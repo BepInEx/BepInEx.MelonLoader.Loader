@@ -35,11 +35,11 @@ namespace MelonLoader
         public static bool IsDebugMode()
 	        => false;
 
-        private static Dictionary<IntPtr, NativeDetour> InstalledHooks { get; } = new Dictionary<IntPtr, NativeDetour>();
+        private static Dictionary<IntPtr, FastNativeDetour> InstalledHooks { get; } = new Dictionary<IntPtr, FastNativeDetour>();
 
         public static void Hook(IntPtr target, IntPtr detour)
         {
-	        var newDetour = new NativeDetour(target, detour);
+	        var newDetour = new FastNativeDetour(target, detour);
 	        newDetour.Apply();
 	        InstalledHooks[target] = newDetour;
         }

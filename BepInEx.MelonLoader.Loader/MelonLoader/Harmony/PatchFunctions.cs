@@ -83,41 +83,41 @@ namespace Harmony
 
 		public static DynamicMethod UpdateWrapper(MethodBase original, PatchInfo patchInfo, string instanceID)
 		{
-			var sortedPrefixes = GetSortedPatchMethods(original, patchInfo.prefixes);
-			var sortedPostfixes = GetSortedPatchMethods(original, patchInfo.postfixes);
-			var sortedTranspilers = GetSortedPatchMethods(original, patchInfo.transpilers);
-			bool isIl2Cpp = UnhollowerSupport.IsGeneratedAssemblyType(original.DeclaringType);
+			// var sortedPrefixes = GetSortedPatchMethods(original, patchInfo.prefixes);
+			// var sortedPostfixes = GetSortedPatchMethods(original, patchInfo.postfixes);
+			// var sortedTranspilers = GetSortedPatchMethods(original, patchInfo.transpilers);
+			// bool isIl2Cpp = UnhollowerSupport.IsGeneratedAssemblyType(original.DeclaringType);
+			//
+			// if (isIl2Cpp) {
+			// 	if (sortedTranspilers.Count > 0) {
+			// 		throw new NotSupportedException("IL2CPP patches cannot use transpilers (got " + sortedTranspilers.Count + ")");
+			// 	}
+			//
+			// 	if (patchInfo.copiedMethodInfoPointer == IntPtr.Zero) {
+			// 		IntPtr origMethodPtr = UnhollowerSupport.MethodBaseToIl2CppMethodInfoPointer(original);
+			// 		patchInfo.copiedMethodInfoPointer = CopyMethodInfoStruct(origMethodPtr);
+			// 		HarmonySharedState.UpdatePatchInfo(original, patchInfo);
+			// 	}
+			//
+			// 	sortedTranspilers.Add(AccessTools.DeclaredMethod(typeof(PatchFunctions), "UnhollowerTranspiler"));
+			// }
+			//
+			// var replacement = MethodPatcher.CreatePatchedMethod(original, instanceID, sortedPrefixes, sortedPostfixes, sortedTranspilers);
+			// if (replacement == null) throw new MissingMethodException("Cannot create dynamic replacement for " + original.FullDescription());
+			//
+			// if (isIl2Cpp) {
+			// 	DynamicMethod il2CppShim = CreateIl2CppShim(replacement, original);
+			// 	InstallIl2CppPatch(patchInfo, il2CppShim);
+			// 	PatchTools.RememberObject(original, new PotatoTuple { First = replacement, Second = il2CppShim});
+			// } else {
+			// 	var errorString = Memory.DetourMethod(original, replacement);
+			// 	if (errorString != null)
+			// 		throw new FormatException("Method " + original.FullDescription() + " cannot be patched. Reason: " + errorString);
+			//
+			// 	PatchTools.RememberObject(original, replacement); // no gc for new value + release old value to gc
+			// }
 
-			if (isIl2Cpp) {
-				if (sortedTranspilers.Count > 0) {
-					throw new NotSupportedException("IL2CPP patches cannot use transpilers (got " + sortedTranspilers.Count + ")");
-				}
-
-				if (patchInfo.copiedMethodInfoPointer == IntPtr.Zero) {
-					IntPtr origMethodPtr = UnhollowerSupport.MethodBaseToIl2CppMethodInfoPointer(original);
-					patchInfo.copiedMethodInfoPointer = CopyMethodInfoStruct(origMethodPtr);
-					HarmonySharedState.UpdatePatchInfo(original, patchInfo);
-				}
-
-				sortedTranspilers.Add(AccessTools.DeclaredMethod(typeof(PatchFunctions), "UnhollowerTranspiler"));
-			}
-
-			var replacement = MethodPatcher.CreatePatchedMethod(original, instanceID, sortedPrefixes, sortedPostfixes, sortedTranspilers);
-			if (replacement == null) throw new MissingMethodException("Cannot create dynamic replacement for " + original.FullDescription());
-
-			if (isIl2Cpp) {
-				DynamicMethod il2CppShim = CreateIl2CppShim(replacement, original);
-				InstallIl2CppPatch(patchInfo, il2CppShim);
-				PatchTools.RememberObject(original, new PotatoTuple { First = replacement, Second = il2CppShim});
-			} else {
-				var errorString = Memory.DetourMethod(original, replacement);
-				if (errorString != null)
-					throw new FormatException("Method " + original.FullDescription() + " cannot be patched. Reason: " + errorString);
-
-				PatchTools.RememberObject(original, replacement); // no gc for new value + release old value to gc
-			}
-
-			return replacement;
+			throw new NotImplementedException("Patching handled by HarmonyXInterop, use normal patching methods instead");
 		}
 
 		private class PotatoTuple

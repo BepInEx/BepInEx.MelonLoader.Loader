@@ -1,68 +1,100 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
+using HarmonyXInterop;
 
 namespace Harmony
 {
-	public static class HarmonySharedState
-	{
-		static readonly string name = "HarmonySharedState";
-		internal static readonly int internalVersion = 100;
-		internal static int actualVersion = -1;
+    internal class PatchHandler
+    {
+        private static readonly Dictionary<MethodBase, PatchHandler> patchHandlers =
+            new Dictionary<MethodBase, PatchHandler>();
 
-		static Dictionary<MethodBase, byte[]> GetState()
-		{
-			lock (name)
-			{
-				var assembly = SharedStateAssembly();
-				if (assembly == null)
-				{
-					var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), AssemblyBuilderAccess.Run);
-					var moduleBuilder = assemblyBuilder.DefineDynamicModule(name);
-					var typeAttributes = TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Abstract;
-					var typeBuilder = moduleBuilder.DefineType(name, typeAttributes);
-					typeBuilder.DefineField("state", typeof(Dictionary<MethodBase, byte[]>), FieldAttributes.Static | FieldAttributes.Public);
-					typeBuilder.DefineField("version", typeof(int), FieldAttributes.Static | FieldAttributes.Public).SetConstant(internalVersion);
-					typeBuilder.CreateType();
+        private MethodBase mb;
 
-					assembly = SharedStateAssembly();
-					if (assembly == null) throw new Exception("Cannot find or create harmony shared state");
-				}
+        private PatchInfoWrapper previousState = new PatchInfoWrapper
+        {
+            prefixes = new PatchMethod[0],
+            postfixes = new PatchMethod[0],
+            transpilers = new PatchMethod[0],
+            finalizers = new PatchMethod[0]
+        };
 
-				var versionField = assembly.GetType(name).GetField("version");
-				if (versionField == null) throw new Exception("Cannot find harmony state version field");
-				actualVersion = (int)versionField.GetValue(null);
+        public void Apply()
+        {
+            PatchMethod[] ToPatchMethod(Patch[] patches)
+            {
+                return patches.Select(p => new PatchMethod
+                {
+                    after = p.after,
+                    before = p.before,
+                    method = p.patch,
+                    priority = p.priority,
+                    owner = p.owner
+                }).ToArray();
+            }
 
-				var stateField = assembly.GetType(name).GetField("state");
-				if (stateField == null) throw new Exception("Cannot find harmony state field");
-				if (stateField.GetValue(null) == null) stateField.SetValue(null, new Dictionary<MethodBase, byte[]>());
-				return (Dictionary<MethodBase, byte[]>)stateField.GetValue(null);
-			}
-		}
+            var info = HarmonySharedState.GetPatchInfo(mb);
+            var state = new PatchInfoWrapper
+            {
+                prefixes = ToPatchMethod(info.prefixes),
+                postfixes = ToPatchMethod(info.postfixes),
+                transpilers = ToPatchMethod(info.transpilers),
+                finalizers = new PatchMethod[0]
+            };
 
-		static Assembly SharedStateAssembly()
-		{
-			return AppDomain.CurrentDomain.GetAssemblies()
-				.FirstOrDefault(a => a.GetName().Name.Contains(name));
-		}
+            var add = new PatchInfoWrapper {finalizers = new PatchMethod[0]};
+            var remove = new PatchInfoWrapper {finalizers = new PatchMethod[0]};
 
-		internal static PatchInfo GetPatchInfo(MethodBase method)
-		{
-			var bytes = GetState().GetValueSafe(method);
-			if (bytes == null) return null;
-			return PatchInfoSerialization.Deserialize(bytes);
-		}
+            Diff(previousState.prefixes, state.prefixes, out add.prefixes, out remove.prefixes);
+            Diff(previousState.postfixes, state.postfixes, out add.postfixes, out remove.postfixes);
+            Diff(previousState.transpilers, state.transpilers, out add.transpilers, out remove.transpilers);
 
-		internal static IEnumerable<MethodBase> GetPatchedMethods()
-		{
-			return GetState().Keys.AsEnumerable();
-		}
+            previousState = state;
 
-		internal static void UpdatePatchInfo(MethodBase method, PatchInfo patchInfo)
-		{
-			GetState()[method] = patchInfo.Serialize();
-		}
-	}
+            HarmonyInterop.ApplyPatch(mb, add, remove);
+        }
+
+        private static void Diff(PatchMethod[] last,
+                                 PatchMethod[] curr,
+                                 out PatchMethod[] add,
+                                 out PatchMethod[] remove)
+        {
+            add = curr.Except(last, PatchMethodComparer.Instance).ToArray();
+            remove = last.Except(curr, PatchMethodComparer.Instance).ToArray();
+        }
+
+        internal static PatchHandler Get(MethodBase method)
+        {
+            lock (patchHandlers)
+            {
+                if (!patchHandlers.TryGetValue(method, out var handler))
+                    patchHandlers[method] = handler = new PatchHandler {mb = method};
+                return handler;
+            }
+        }
+    }
+
+    public static class HarmonySharedState
+    {
+        private static readonly Dictionary<MethodBase, PatchInfo> patchInfos = new Dictionary<MethodBase, PatchInfo>();
+
+        internal static PatchInfo GetPatchInfo(MethodBase method)
+        {
+            lock (patchInfos)
+            {
+                if (!patchInfos.TryGetValue(method, out var info))
+                    patchInfos[method] = info = new PatchInfo();
+                return info;
+            }
+        }
+
+        internal static IEnumerable<MethodBase> GetPatchedMethods()
+        {
+            lock (patchInfos)
+            {
+                return patchInfos.Keys.ToList().AsEnumerable();
+            }
+        }
+    }
 }

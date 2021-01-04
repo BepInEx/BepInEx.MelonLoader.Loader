@@ -77,9 +77,8 @@ namespace Harmony
 						PatchFunctions.AddPrefix(patchInfo, instance.Id, prefix);
 						PatchFunctions.AddPostfix(patchInfo, instance.Id, postfix);
 						PatchFunctions.AddTranspiler(patchInfo, instance.Id, transpiler);
-						dynamicMethods.Add(PatchFunctions.UpdateWrapper(original, patchInfo, instance.Id));
-
-						HarmonySharedState.UpdatePatchInfo(original, patchInfo);
+						
+						PatchHandler.Get(original).Apply();
 
 						RunMethod<HarmonyCleanup>(original);
 					}
@@ -103,9 +102,8 @@ namespace Harmony
 						PatchFunctions.RemovePostfix(patchInfo, harmonyID);
 					if (type == HarmonyPatchType.All || type == HarmonyPatchType.Transpiler)
 						PatchFunctions.RemoveTranspiler(patchInfo, harmonyID);
-					PatchFunctions.UpdateWrapper(original, patchInfo, instance.Id);
 
-					HarmonySharedState.UpdatePatchInfo(original, patchInfo);
+					PatchHandler.Get(original).Apply();
 				}
 			}
 		}
@@ -120,9 +118,8 @@ namespace Harmony
 					if (patchInfo == null) patchInfo = new PatchInfo();
 
 					PatchFunctions.RemovePatch(patchInfo, patch);
-					PatchFunctions.UpdateWrapper(original, patchInfo, instance.Id);
-
-					HarmonySharedState.UpdatePatchInfo(original, patchInfo);
+					
+					PatchHandler.Get(original).Apply();
 				}
 			}
 		}
