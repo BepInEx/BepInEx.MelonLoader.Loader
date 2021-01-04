@@ -9,13 +9,35 @@ using MonoMod.RuntimeDetour;
 
 namespace MelonLoader
 {
+	internal static class AppInfo
+	{
+		public static readonly string CompanyName;
+		public static readonly string ProductName;
+		
+		static AppInfo()
+		{
+			// Why app.info? It's not even present on a majority of Unity games.
+			// Yes, some developers delete them manually
+			// Oh well...
+			var appInfoPath = Path.Combine(Imports.GetGameDataDirectory(), "app.info");
+			if (!File.Exists(appInfoPath))
+				return;
+			var lines = File.ReadAllLines(appInfoPath);
+			string Read(string[] l, int i) => l.Length > i ? lines[i] : null;
+			CompanyName = Read(lines, 0);
+			ProductName = Read(lines, 1);
+		}
+	}
+	
     public static class Imports
     {
+	    private const string UnknownItem = "UNKNOWN";
+	    
 	    public static string GetCompanyName()
-		    => Process.GetCurrentProcess().MainModule.FileVersionInfo.CompanyName;
+		    => AppInfo.CompanyName ?? UnknownItem;
 
         public static string GetProductName()
-	        => Process.GetCurrentProcess().MainModule.FileVersionInfo.ProductName;
+	        => AppInfo.ProductName ?? UnknownItem;
 
         public static string GetGameDirectory()
 	        => Paths.GameRootPath;
