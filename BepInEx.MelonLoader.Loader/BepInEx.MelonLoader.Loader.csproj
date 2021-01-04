@@ -33,9 +33,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\bin\il2cpp\0Harmony.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="0Harmony, Version=2.3.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\HarmonyX.2.3.1\lib\net45\0Harmony.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="BepInEx.Core">
       <HintPath>..\..\BepInEx\bin\il2cpp\BepInEx.Core.dll</HintPath>
@@ -53,13 +53,29 @@
       <HintPath>..\Libs\Il2CppSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>G:\SteamLibrary\steamapps\common\VRChat\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Mono.Cecil, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="MonoMod.Utils">
-      <HintPath>G:\SteamLibrary\steamapps\common\VRChat\BepInEx\core\MonoMod.Utils.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour, Version=20.11.26.2, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\MonoMod.RuntimeDetour.20.11.26.2\lib\net40\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils, Version=20.11.26.2, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\MonoMod.Utils.20.11.26.2\lib\net40\MonoMod.Utils.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -85,6 +101,10 @@
     <Compile Include="MelonLoader\BuildInfo.cs" />
     <Compile Include="MelonLoader\DependencyGraph.cs" />
     <Compile Include="MelonLoader\Deprecated.cs" />
+    <Compile Include="MelonLoader\HarmonyInterop\DMDUtil.cs" />
+    <Compile Include="MelonLoader\HarmonyInterop\HarmonyInterop.cs" />
+    <Compile Include="MelonLoader\HarmonyInterop\PatchModel.cs" />
+    <Compile Include="MelonLoader\HarmonyInterop\TranspilerInterop.cs" />
     <Compile Include="MelonLoader\Harmony\Attributes.cs" />
     <Compile Include="MelonLoader\Harmony\CodeInstruction.cs" />
     <Compile Include="MelonLoader\Harmony\CodeTranspiler.cs" />
@@ -198,11 +218,11 @@
     <Compile Include="MLLoaderPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="MelonLoader\Harmony\LICENSE" />
     <None Include="MelonLoader\Harmony\README.md" />
     <None Include="MelonLoader\SharpZipLib\README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MelonLoader\SharpZipLib\LICENSE.txt" />
