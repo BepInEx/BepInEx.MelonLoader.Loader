@@ -1,231 +1,67 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7D64B55B-887B-4A70-A5FD-5E01B849B9BC}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BepInEx.MelonLoader.Loader</RootNamespace>
-    <AssemblyName>BepInEx.MelonLoader.Loader</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.3.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\HarmonyX.2.3.1\lib\net45\0Harmony.dll</HintPath>
-      <Private>True</Private>
+    <PackageReference Include="Samboy063.Tomlet" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Core">
-      <HintPath>..\..\BepInEx\bin\il2cpp\BepInEx.Core.dll</HintPath>
+      <HintPath>..\libs\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.IL2CPP">
-      <HintPath>..\..\BepInEx\bin\il2cpp\BepInEx.IL2CPP.dll</HintPath>
+      <HintPath>..\libs\BepInEx.IL2CPP.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\Libs\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>..\melonloader-libs\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem">
-      <HintPath>..\Libs\Il2CppSystem.dll</HintPath>
+      <HintPath>..\melonloader-libs\Il2CppSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\libs\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\libs\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Pdb, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\libs\MonoMod.Utils.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-      <HintPath>..\packages\Mono.Cecil.0.11.3\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MonoMod.RuntimeDetour, Version=20.11.26.2, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\MonoMod.RuntimeDetour.20.11.26.2\lib\net40\MonoMod.RuntimeDetour.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MonoMod.Utils, Version=20.11.26.2, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\MonoMod.Utils.20.11.26.2\lib\net40\MonoMod.Utils.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>..\..\BepInEx\bin\il2cpp\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>..\melonloader-libs\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerRuntimeLib">
-      <HintPath>..\..\BepInEx\bin\il2cpp\UnhollowerRuntimeLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\Libs\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\melonloader-libs\UnhollowerRuntimeLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\Libs\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\melonloader-libs\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="MelonLoader\BuildInfo.cs" />
-    <Compile Include="MelonLoader\DependencyGraph.cs" />
-    <Compile Include="MelonLoader\Deprecated.cs" />
-    <Compile Include="MelonLoader\HarmonyInterop\DMDUtil.cs" />
-    <Compile Include="MelonLoader\HarmonyInterop\HarmonyInterop.cs" />
-    <Compile Include="MelonLoader\HarmonyInterop\PatchModel.cs" />
-    <Compile Include="MelonLoader\HarmonyInterop\TranspilerInterop.cs" />
-    <Compile Include="MelonLoader\Harmony\Attributes.cs" />
-    <Compile Include="MelonLoader\Harmony\CodeInstruction.cs" />
-    <Compile Include="MelonLoader\Harmony\CodeTranspiler.cs" />
-    <Compile Include="MelonLoader\Harmony\Extras\DelegateTypeFactory.cs" />
-    <Compile Include="MelonLoader\Harmony\Extras\FastAccess.cs" />
-    <Compile Include="MelonLoader\Harmony\Extras\MethodInvoker.cs" />
-    <Compile Include="MelonLoader\Harmony\GlobalSuppressions.cs" />
-    <Compile Include="MelonLoader\Harmony\HarmonyInstance.cs" />
-    <Compile Include="MelonLoader\Harmony\HarmonyMethod.cs" />
-    <Compile Include="MelonLoader\Harmony\HarmonySharedState.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\ByteBuffer.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\Emitter.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\ILInstruction.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\Memory.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\MethodCopier.cs" />
-    <Compile Include="MelonLoader\Harmony\ILCopying\Signature.cs" />
-    <Compile Include="MelonLoader\Harmony\MethodPatcher.cs" />
-    <Compile Include="MelonLoader\Harmony\Patch.cs" />
-    <Compile Include="MelonLoader\Harmony\PatchFunctions.cs" />
-    <Compile Include="MelonLoader\Harmony\PatchProcessor.cs" />
-    <Compile Include="MelonLoader\Harmony\Priority.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\AccessCache.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\AccessTools.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\DynamicTools.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\Extensions.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\FileLog.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\PatchTools.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\SelfPatching.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\SymbolExtensions.cs" />
-    <Compile Include="MelonLoader\Harmony\Tools\Traverse.cs" />
-    <Compile Include="MelonLoader\Harmony\Transpilers.cs" />
-    <Compile Include="MelonLoader\IL2CPP\Il2CppAssetBundleManager.cs" />
-    <Compile Include="MelonLoader\IL2CPP\IL2CPPMain.cs" />
-    <Compile Include="MelonLoader\IL2CPP\MelonCoroutines.cs" />
-    <Compile Include="MelonLoader\IL2CPP\SupportModule.cs" />
-    <Compile Include="MelonLoader\Imports.cs" />
-    <Compile Include="MelonLoader\IniFile.cs" />
-    <Compile Include="MelonLoader\MelonBase.cs" />
-    <Compile Include="MelonLoader\MelonConsole.cs" />
-    <Compile Include="MelonLoader\MelonCoroutines.cs" />
-    <Compile Include="MelonLoader\MelonHandler.cs" />
-    <Compile Include="MelonLoader\MelonLoaderBase.cs" />
-    <Compile Include="MelonLoader\MelonLogger.cs" />
-    <Compile Include="MelonLoader\MelonMod.cs" />
-    <Compile Include="MelonLoader\MelonPlugin.cs" />
-    <Compile Include="MelonLoader\MelonPrefs.cs" />
-    <Compile Include="MelonLoader\SceneHandler.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\BZip2\BZip2.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\BZip2\BZip2Constants.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\BZip2\BZip2Exception.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\BZip2\BZip2InputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\BZip2\BZip2OutputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Checksums\Adler32.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Checksums\CRC32.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Checksums\IChecksum.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Checksums\StrangeCRC.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\FileSystemScanner.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\INameTransform.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\IScanFilter.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\NameFilter.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\PathFilter.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\StreamUtils.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Core\WindowsPathUtils.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Encryption\PkzipClassic.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Encryption\ZipAESStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Encryption\ZipAESTransform.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\GZip\GZIPConstants.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\GZip\GZipException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\GZip\GzipInputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\GZip\GzipOutputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Lzw\LzwConstants.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Lzw\LzwException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Lzw\LzwInputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\SharpZipBaseException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\InvalidHeaderException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarArchive.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarBuffer.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarEntry.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarHeader.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarInputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Tar\TarOutputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Deflater.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\DeflaterConstants.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\DeflaterEngine.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\DeflaterHuffman.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\DeflaterPending.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Inflater.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\InflaterDynHeader.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\InflaterHuffmanTree.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\PendingBuffer.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Streams\DeflaterOutputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Streams\InflaterInputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Streams\OutputWindow.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\Compression\Streams\StreamManipulator.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\FastZip.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\IEntryFactory.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\WindowsNameTransform.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipConstants.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipEntry.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipEntryFactory.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipException.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipExtraData.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipFile.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipHelperStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipInputStream.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipNameTransform.cs" />
-    <Compile Include="MelonLoader\SharpZipLib\Zip\ZipOutputStream.cs" />
-    <Compile Include="MelonLoader\SupportModule.cs" />
-    <Compile Include="MelonLoader\UnhollowerSupport.cs" />
-    <Compile Include="MLLoaderPlugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Folder Include="MelonLoader\Properties\" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="MelonLoader\Harmony\LICENSE" />
-    <None Include="MelonLoader\Harmony\README.md" />
-    <None Include="MelonLoader\SharpZipLib\README.md" />
-    <None Include="packages.config" />
+    <ProjectReference Include="..\SharpZipLib\ICSharpCode.SharpZipLib.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="MelonLoader\SharpZipLib\LICENSE.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>
