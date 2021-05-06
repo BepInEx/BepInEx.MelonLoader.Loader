@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections;
 using System.Reflection;
 
@@ -22,24 +21,7 @@ namespace MelonLoader
 
             try
             {
-                Type type = typeof(MelonLoader.Support.Main);
-                if (type == null)
-                {
-                    MelonLogger.Error("Failed to Get Type MelonLoader.Support.Main!");
-                    return false;
-                }
-                MethodInfo method = type.GetMethod("Initialize", BindingFlags.NonPublic | BindingFlags.Static);
-                if (method == null)
-                {
-                    MelonLogger.Error("Failed to Get Method Initialize!");
-                    return false;
-                }
-                Interface = (ISupportModule_To)method.Invoke(null, new object[] { new SupportModule_From() });
-                if (Interface == null)
-                {
-                    MelonLogger.Error("Failed to Initialize Interface!");
-                    return false;
-                }
+                Interface = Support.Main.Initialize(new SupportModule_From());
             }
             catch(Exception ex) { MelonLogger.Error(ex.ToString()); return false; }
             return true;
@@ -81,6 +63,7 @@ namespace MelonLoader
         void OnGUI();
         void Quit();
         void BONEWORKS_OnLoadingScreen();
+        void VRChat_OnUiManagerInit();
     }
 
     internal class SupportModule_From : ISupportModule_From
@@ -93,5 +76,6 @@ namespace MelonLoader
         public void OnGUI() => MelonHandler.OnGUI();
         public void Quit() => Core.Quit();
         public void BONEWORKS_OnLoadingScreen() => MelonHandler.BONEWORKS_OnLoadingScreen();
+        public void VRChat_OnUiManagerInit() => MelonHandler.VRChat_OnUiManagerInit();
     }
 }

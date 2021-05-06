@@ -18,7 +18,7 @@ namespace MelonLoader.Support
         internal static Component component = null;
         private static Camera OnPostRenderCam = null;
 
-        private static ISupportModule_To Initialize(ISupportModule_From interface_from)
+        public static ISupportModule_To Initialize(ISupportModule_From interface_from)
         {
             Interface = interface_from;
 

@@ -31,6 +31,7 @@ namespace MelonLoader
         public static string GameDeveloper { get; private set; }
         public static string GameName { get; private set; }
         public static bool IsBONEWORKS { get => (!string.IsNullOrEmpty(GameDeveloper) && GameDeveloper.Equals("Stress Level Zero") && !string.IsNullOrEmpty(GameName) && GameName.Equals("BONEWORKS")); }
+        public static bool IsVRChat { get => (!string.IsNullOrEmpty(GameDeveloper) && GameDeveloper.Equals("VRChat") && !string.IsNullOrEmpty(GameName) && GameName.Equals("VRChat")); }
         public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> { if (value.CompareTo(min) < 0) return min; if (value.CompareTo(max) > 0) return max; return value; }
         public static string HashCode { get; private set; }
 
@@ -145,7 +146,7 @@ namespace MelonLoader
             : Path.Combine(BepInEx.Paths.GameRootPath, $"{BepInEx.Paths.ProcessName}_Data", "Managed");
 
         public static string GetEmulatedManagedDirectory()
-            => Path.Combine(GetGameDirectory(), "MelonLoader", "EmulatedManaged");
+            => Path.Combine(BepInEx.Paths.GameRootPath, "MelonLoader", "EmulatedManaged");
 
 
         private static string cachedUnityVersion { get; }
