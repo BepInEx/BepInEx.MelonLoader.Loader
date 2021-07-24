@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 
 namespace MelonLoader
 {
@@ -40,18 +39,18 @@ namespace MelonLoader
         {
             BaseDirectory = Path.Combine(Path.Combine(Path.Combine(MelonUtils.BaseDirectory, "MelonLoader"), "Dependencies"), "CompatibilityLayers");
 
-            string versionending = ", Version=";
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-                (args.Name.StartsWith($"Mono.Cecil{versionending}")
-                || args.Name.StartsWith($"Mono.Cecil.Mdb{versionending}")
-                || args.Name.StartsWith($"Mono.Cecil.Pdb{versionending}")
-                || args.Name.StartsWith($"Mono.Cecil.Rocks{versionending}")
-                || args.Name.StartsWith($"MonoMod.RuntimeDetour{versionending}")
-                || args.Name.StartsWith($"MonoMod.Utils{versionending}")
-                || args.Name.StartsWith($"0Harmony{versionending}")
-                || args.Name.StartsWith($"Tomlet{versionending}"))
-                ? typeof(MelonCompatibilityLayer).Assembly
-                : null;
+            //string versionending = ", Version=";
+            //AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            //    (args.Name.StartsWith($"Mono.Cecil{versionending}")
+            //    || args.Name.StartsWith($"Mono.Cecil.Mdb{versionending}")
+            //    || args.Name.StartsWith($"Mono.Cecil.Pdb{versionending}")
+            //    || args.Name.StartsWith($"Mono.Cecil.Rocks{versionending}")
+            //    || args.Name.StartsWith($"MonoMod.RuntimeDetour{versionending}")
+            //    || args.Name.StartsWith($"MonoMod.Utils{versionending}")
+            //    || args.Name.StartsWith($"0Harmony{versionending}")
+            //    || args.Name.StartsWith($"Tomlet{versionending}"))
+            //    ? typeof(MelonCompatibilityLayer).Assembly
+            //    : null;
 
             CompatibilityLayers.Melon_Resolver.Setup();
         }
@@ -163,6 +162,9 @@ namespace MelonLoader
         public static void AddAssemblyToResolverEvent(Func<Assembly, string, Resolver> evt) => AssemblyToResolverEvents += evt;
         internal static Resolver GetResolverFromAssembly(Assembly assembly, string filepath)
         {
+	        if (AssemblyToResolverEvents == null)
+		        return null;
+
             Delegate[] invoke_list = AssemblyToResolverEvents.GetInvocationList();
             if (invoke_list.Length <= 0)
                 return null;

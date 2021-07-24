@@ -887,6 +887,14 @@
             <param name="plugin">The plugin instance.</param>
             <returns>The attributes of the instance, if existing.</returns>
         </member>
+        <member name="M:BepInEx.MetadataHelper.GetAttributes``1(System.Reflection.MemberInfo)">
+            <summary>
+                Gets the specified attributes of a reflection metadata type, if they exist.
+            </summary>
+            <typeparam name="T">The attribute type to retrieve.</typeparam>
+            <param name="member">The reflection metadata instance.</param>
+            <returns>The attributes of the instance, if existing.</returns>
+        </member>
         <member name="M:BepInEx.MetadataHelper.GetDependencies(System.Type)">
             <summary>
                 Retrieves the dependencies of the specified plugin type.
@@ -1199,6 +1207,69 @@
             <param name="data">Data to log.</param>
         </member>
         <member name="M:BepInEx.Logging.ManualLogSource.LogDebug(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Debug" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="T:BepInEx.Logging.StreamLogSource">
+            <summary>
+                A generic, multi-purpose log source. Exposes simple API to manually emit logs.
+            </summary>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.#ctor(System.String)">
+            <summary>
+                Creates a manual log source.
+            </summary>
+            <param name="sourceName">Name of the log source.</param>
+        </member>
+        <member name="P:BepInEx.Logging.StreamLogSource.SourceName">
+            <inheritdoc />
+        </member>
+        <member name="E:BepInEx.Logging.StreamLogSource.LogEvent">
+            <inheritdoc />
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.Log(BepInEx.Logging.LogLevel,System.Object)">
+            <summary>
+                Logs a message with the specified log level.
+            </summary>
+            <param name="level">Log levels to attach to the message. Multiple can be used with bitwise ORing.</param>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogFatal(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Fatal" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogError(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Error" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogWarning(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Warning" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogMessage(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Message" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogInfo(System.Object)">
+            <summary>
+                Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Info" /> level.
+            </summary>
+            <param name="data">Data to log.</param>
+        </member>
+        <member name="M:BepInEx.Logging.StreamLogSource.LogDebug(System.Object)">
             <summary>
                 Logs a message with <see cref="F:BepInEx.Logging.LogLevel.Debug" /> level.
             </summary>

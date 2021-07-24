@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using BepInEx.Configuration;
+
+[assembly: InternalsVisibleTo("BepInEx.MelonLoader.Loader")]
 
 namespace MelonLoader
 {
@@ -6,31 +10,33 @@ namespace MelonLoader
     {
         internal static HarmonyLib.Harmony HarmonyInstance = null;
 
-        static Core()
+        internal static int Initialize(ConfigFile configFile)
         {
-            AppDomain curDomain = AppDomain.CurrentDomain;
-            HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
+	        //AppDomain curDomain = AppDomain.CurrentDomain;
+	        HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
 
-            Fixes.UnhandledException.Run(curDomain);
-            Fixes.InvariantCurrentCulture.Install();
+	        //Fixes.UnhandledException.Run(curDomain);
+	        Fixes.InvariantCurrentCulture.Install();
 
-            try { MelonUtils.Setup(); } catch (Exception ex) { MelonLogger.Error("MelonUtils.Setup Exception: " + ex.ToString()); throw ex; }
+	        try { MelonUtils.Setup(); } catch (Exception ex) { MelonLogger.Error($"MelonUtils.Setup Exception: {ex}"); throw; }
 
-            Fixes.ApplicationBase.Run(curDomain);
-            Fixes.ExtraCleanup.Run();
+	        //Fixes.ApplicationBase.Run(curDomain);
+	        Fixes.ExtraCleanup.Run();
 
-            MelonPreferences.Load();
-            MelonLaunchOptions.Load();
-            MelonCompatibilityLayer.Setup();
+	        MelonPreferences.Load();
+	        MelonLaunchOptions.Load(configFile);
 
-            PatchShield.Install();
-        }
+            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
+				MelonCompatibilityLayer.Setup();
+            
+            if (MelonLaunchOptions.Core.EnablePatchShield)
+                PatchShield.Install();
 
-        private static int Initialize()
-        {
-            bHaptics.Load();
+            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
+				bHaptics.Load();
 
-            MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnPreInitialization);
+            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
+                MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnPreInitialization);
 
             MelonHandler.LoadPlugins();
             MelonHandler.OnPreInitialization();
@@ -38,19 +44,22 @@ namespace MelonLoader
             return 0;
         }
 
-        private static int PreStart()
+        internal static int PreStart()
         {
-            if (!MelonUtils.IsGameIl2Cpp())
-                GameVersionHandler.Setup();
+			if (!MelonUtils.IsGameIl2Cpp())
+				GameVersionHandler.Setup();
 
-            MelonHandler.OnApplicationEarlyStart();
+			MelonHandler.OnApplicationEarlyStart();
 
             if (MelonUtils.IsGameIl2Cpp())
             {
-                if (!Il2CppAssemblyGenerator.Run())
-                    return 1;
-                
-                HarmonyLib.Public.Patching.PatchManager.ResolvePatcher += HarmonyIl2CppMethodPatcher.TryResolve;
+				if (MelonLaunchOptions.Core.EnableAssemblyGeneration)
+				{
+					if (!Il2CppAssemblyGenerator.Run())
+						return 1;
+				}
+
+				HarmonyLib.Public.Patching.PatchManager.ResolvePatcher += HarmonyIl2CppMethodPatcher.TryResolve;
 
                 GameVersionHandler.Setup();
             }
@@ -58,15 +67,19 @@ namespace MelonLoader
             return 0;
         }
 
-        private static int Start()
+        internal static int Start()
         {
             if (!SupportModule.Initialize())
                 return 1;
 
             AddUnityDebugLog();
-            bHaptics.Start();
 
-            MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnApplicationStart);
+            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
+				bHaptics.Start();
+
+            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
+                MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnApplicationStart);
+
             MelonHandler.OnApplicationStart_Plugins();
             MelonHandler.LoadMods();
             MelonHandler.OnApplicationStart_Mods();
@@ -84,8 +97,7 @@ namespace MelonLoader
 
             HarmonyInstance.UnpatchAll();
             bHaptics.Quit();
-
-            MelonLogger.Flush();
+            
             Fixes.QuitFix.Run();
         }
 

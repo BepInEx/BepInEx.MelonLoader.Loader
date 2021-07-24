@@ -51,9 +51,7 @@ namespace MelonLoader
                 ? (string)method.Invoke(null, new object[0])
                 : null;
         }
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static void SetDefaultConsoleTitleWithGameName([MarshalAs(UnmanagedType.LPStr)] string GameVersion = null);
+        
+        private static void SetDefaultConsoleTitleWithGameName([MarshalAs(UnmanagedType.LPStr)] string GameVersion = null) { } // stubbed out
     }
 }

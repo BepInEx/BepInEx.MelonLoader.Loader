@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace MelonLoader
 {
@@ -18,9 +17,8 @@ namespace MelonLoader
 
             if (RunMethod != null)
             {
-                DisableCloseButton();
                 int returnval = (int)RunMethod.Invoke(null, new object[0]);
-                EnableCloseButton();
+
                 Fixes.ApplicationBase.Run(AppDomain.CurrentDomain);
                 return (returnval == 0);
             }
@@ -32,7 +30,7 @@ namespace MelonLoader
         {
             MelonLogger.Msg("Loading Il2CppAssemblyGenerator...");
 
-            string BaseDirectory = Path.Combine(Path.Combine(Path.Combine(MelonUtils.BaseDirectory, "MelonLoader"), "Dependencies"), "Il2CppAssemblyGenerator");
+            string BaseDirectory = Path.Combine(Path.Combine(MelonUtils.BaseDirectory, "Dependencies"), "Il2CppAssemblyGenerator");
             if (!Directory.Exists(BaseDirectory))
             {
                 MelonLogger.Error("Failed to Find Il2CppAssemblyGenerator Directory!");
@@ -68,10 +66,5 @@ namespace MelonLoader
             }
             catch (Exception ex) { MelonLogger.ThrowInternalFailure($"Il2CppAssemblyGenerator Exception: {ex}"); }
         }
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void EnableCloseButton();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void DisableCloseButton();
     }
 }

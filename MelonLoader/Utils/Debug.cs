@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using BepInEx.Logging;
 
 namespace MelonLoader
 {
@@ -43,13 +44,11 @@ namespace MelonLoader
                 namesection = melon.Info.Name.Replace(" ", "_");
                 msgcolor = melon.ConsoleColor;
             }
-            Internal_Msg(meloncolor, msgcolor, namesection, msg);
+            MelonLogger.PushMessageToBepInEx(namesection, msg, LogLevel.Debug);
             MsgCallbackHandler?.Invoke(meloncolor, msgcolor, namesection, msg);
         }
 
         public static event Action<ConsoleColor, ConsoleColor, string, string> MsgCallbackHandler;
         public static bool IsEnabled() => MelonLaunchOptions.Core.DebugMode;
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Internal_Msg(ConsoleColor meloncolor, ConsoleColor msgcolor, string namesection, string txt);
     }
 }

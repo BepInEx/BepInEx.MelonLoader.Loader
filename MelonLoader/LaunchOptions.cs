@@ -1,87 +1,38 @@
-﻿using System;
-//using System.Collections.Generic;
-//using System.IO;
+﻿using BepInEx.Configuration;
 
 namespace MelonLoader
 {
     public static class MelonLaunchOptions
     {
-        internal static void Load()
+        internal static void Load(ConfigFile configFile)
         {
-#if DEBUG
-            Core.DebugMode = true;
-#endif
+	        Core.DebugMode =
+		        configFile.Bind("LaunchArguments", "DebugMode", false, "Launches MelonLoader in debug mode, i.e. makes everything more verbose").Value;
 
-            string[] args = Environment.GetCommandLineArgs();
-            if ((args == null)
-                || (args.Length <= 0))
-                return;
+            const string loadModeDescription = "Sets the loading mode for {0}.\nNORMAL: Does not load {0} ending with .dev.dll\nDEV: Only loads {0} ending with .dev.dll\nBOTH: Loads all .dll files";
 
-            for (int i = 0; i < args.Length; i++)
-            {
-                string arg = args[i];
-                if (string.IsNullOrEmpty(arg))
-                    continue;
-                arg = arg.ToLowerInvariant();
-                int valueint = 0;
-                string valuestr = null;
-                if ((i + 1) < args.Length)
-                    valuestr = args[i + 1];
-                switch (arg)
-                {
-#if !DEBUG
-                    case "--melonloader.debug":
-                        Core.DebugMode = true;
-                        goto default;
-#endif
-                    case "--quitfix":
-                        Core.QuitFix = true;
-                        goto default;
+	        Core.LoadMode_Plugins =
+		        configFile.Bind("LaunchArguments", "LoadMode_Plugins", Core.LoadModeEnum.NORMAL, string.Format(loadModeDescription, "plugins")).Value;
+	        Core.LoadMode_Mods =
+		        configFile.Bind("LaunchArguments", "LoadMode_Mods", Core.LoadModeEnum.NORMAL, string.Format(loadModeDescription, "mods")).Value;
 
-                    case "--melonloader.agfoffline":
-                        Il2CppAssemblyGenerator.OfflineMode = true;
-                        goto default;
-                    case "--melonloader.agfregenerate":
-                        Il2CppAssemblyGenerator.ForceRegeneration = true;
-                        goto default;
-                    case "--melonloader.agfvdumper":
-                        if (string.IsNullOrEmpty(valuestr))
-                            goto default;
-                        Il2CppAssemblyGenerator.ForceVersion_Dumper = valuestr;
-                        goto default;
-                    case "--melonloader.agfvunhollower":
-                        if (string.IsNullOrEmpty(valuestr))
-                            goto default;
-                        Il2CppAssemblyGenerator.ForceVersion_Il2CppAssemblyUnhollower = valuestr;
-                        goto default;
-                    case "--melonloader.agfvunity":
-                        if (string.IsNullOrEmpty(valuestr))
-                            goto default;
-                        Il2CppAssemblyGenerator.ForceVersion_UnityDependencies = valuestr;
-                        goto default;
-                    case "--melonloader.loadmodeplugins":
-                        if (string.IsNullOrEmpty(valuestr))
-                            goto default;
-                        if (!int.TryParse(valuestr, out valueint))
-                            goto default;
-                        Core.LoadMode_Plugins = (Core.LoadModeEnum)MelonUtils.Clamp(valueint, (int)Core.LoadModeEnum.NORMAL, (int)Core.LoadModeEnum.BOTH);
-                        goto default;
-                    case "--melonloader.loadmodemods":
-                        if ((i + 1) < args.Length)
-                            valuestr = args[i + 1];
-                        if (string.IsNullOrEmpty(valuestr))
-                            goto default;
-                        if (!int.TryParse(valuestr, out valueint))
-                            goto default;
-                        Core.LoadMode_Mods = (Core.LoadModeEnum)MelonUtils.Clamp(valueint, (int)Core.LoadModeEnum.NORMAL, (int)Core.LoadModeEnum.BOTH);
-                        goto default;
-                    default:
-                        break;
-                }
-            }
+	        Core.QuitFix =
+		        configFile.Bind("LaunchArguments", "QuitFix", false, "Ensures that if a mod / plugin / MelonLoader itself requests the game to close, the game's process will be forcefully terminated if it does not close").Value;
+            
+	        Core.EnablePatchShield =
+		        configFile.Bind("Framework", "EnablePatchShield", true, "If true, configures Harmony in such a way that prevents patching critical / sensitive code. Many VRCMG plugins will refuse to load if this is disabled.").Value;
+
+	        Core.EnableCompatibilityLayers =
+		        configFile.Bind("Framework", "EnableCompatibilityLayers", true, "If true, MelonLoader will load compatibility layer modules so it can load other modloader plugins (such as IPA and MDML), and other misc. integrations.\nIs required to remain true, as disabling this seems to break regular plugin loading.").Value;
+
+	        Core.EnableBHapticsIntegration =
+		        configFile.Bind("Framework", "EnableBHapticsIntegration", true, "If true, MelonLoader will load its BHaptics library module.").Value;
+	        
+	        Core.EnableAssemblyGeneration =
+		        configFile.Bind("Framework", "EnableAssemblyGeneration", false, "If true, MelonLoader will generate it's own set of unhollowed assemblies alongside BepInEx.").Value;
         }
 
-#region Args
+        #region Args
         public static class Core
         {
             public enum LoadModeEnum
@@ -94,6 +45,10 @@ namespace MelonLoader
             public static LoadModeEnum LoadMode_Mods { get; internal set; }
             public static bool DebugMode { get; internal set; }
             public static bool QuitFix { get; internal set; }
+            public static bool EnablePatchShield { get; internal set; }
+            public static bool EnableCompatibilityLayers { get; internal set; }
+            public static bool EnableBHapticsIntegration { get; internal set; }
+            public static bool EnableAssemblyGeneration { get; internal set; }
         }
 
         public static class Il2CppAssemblyGenerator

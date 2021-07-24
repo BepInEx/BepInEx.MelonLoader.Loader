@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using BepInEx.Logging;
 
 namespace MelonLoader
 {
@@ -7,6 +8,8 @@ namespace MelonLoader
     {
         public static readonly ConsoleColor DefaultMelonColor = ConsoleColor.Cyan;
         public static readonly ConsoleColor DefaultTextColor = ConsoleColor.Gray;
+
+        public static ManualLogSource BepInExLog = Logger.CreateLogSource("MelonLoader");
 
         public static void Msg(string txt) => SendMsg(DefaultTextColor, txt);
         public static void Msg(string txt, params object[] args) => SendMsg(DefaultTextColor, string.Format(txt, args));
@@ -23,6 +26,20 @@ namespace MelonLoader
         public static void Error(string txt, params object[] args) => SendError(string.Format(txt, args));
         public static void Error(object obj) => SendError(obj.ToString());
 
+        internal static void PushMessageToBepInEx(string namesection, string message, LogLevel level)
+        {
+	        message ??= "<null>";
+
+            if (!string.IsNullOrEmpty(namesection))
+	        {
+		        BepInExLog.Log(level, $"[{namesection}] {message}");
+	        }
+	        else
+	        {
+		        BepInExLog.Log(level, message);
+	        }
+        }
+
         private static void SendMsg(ConsoleColor txtcolor, string txt)
         {
             ConsoleColor meloncolor = DefaultMelonColor;
@@ -33,7 +50,8 @@ namespace MelonLoader
                 namesection = melon.Info.Name.Replace(" ", "_");
                 meloncolor = melon.ConsoleColor;
             }
-            Internal_Msg(meloncolor, txtcolor, namesection, txt ?? "null");
+
+            PushMessageToBepInEx(namesection, txt, LogLevel.Message);
             RunMsgCallbacks(meloncolor, txtcolor, namesection, txt ?? "null");
         }
 
@@ -43,7 +61,7 @@ namespace MelonLoader
             MelonBase melon = MelonUtils.GetMelonFromStackTrace();
             if (melon != null)
                 namesection = melon.Info.Name;
-            ManualWarning(namesection, txt ?? "null");
+            ManualWarning(namesection, txt);
         }
 
         private static void SendError(string txt) => ManualMelonError(MelonUtils.GetMelonFromStackTrace(), txt ?? "null");
@@ -51,7 +69,8 @@ namespace MelonLoader
         internal static void ManualWarning(string namesection, string txt)
         {
             namesection = namesection?.Replace(" ", "_");
-            Internal_Warning(namesection, txt ?? "null");
+
+            PushMessageToBepInEx(namesection, txt, LogLevel.Warning);
             RunWarningCallbacks(namesection, txt ?? "null");
         }
 
@@ -60,12 +79,8 @@ namespace MelonLoader
             string namesection = null;
             if (melon != null)
                 namesection = melon.Info.Name.Replace(" ", "_");
-            ManualError(namesection, txt ?? "null");
-        }
 
-        internal static void ManualError(string namesection, string txt)
-        {
-            Internal_Error(namesection, txt ?? "null");
+            PushMessageToBepInEx(namesection, txt, LogLevel.Error);
             RunErrorCallbacks(namesection, txt ?? "null");
         }
 
@@ -75,20 +90,23 @@ namespace MelonLoader
         public static event Action<string, string> WarningCallbackHandler;
         internal static void RunErrorCallbacks(string namesection, string msg) => ErrorCallbackHandler?.Invoke(namesection, msg);
         public static event Action<string, string> ErrorCallbackHandler;
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Internal_Msg(ConsoleColor meloncolor, ConsoleColor txtcolor, string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Internal_Warning(string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static void Internal_Error(string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void ThrowInternalFailure(string msg);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void WriteSpacer();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Internal_PrintModName(ConsoleColor meloncolor, string name, string version);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Flush();
+
+        internal static void ThrowInternalFailure(string v)
+        {
+	        BepInExLog.LogError($"[{DateTime.Now}] [INTERNAL FAILURE] {v}");
+	        // process is usually killed here but i'm not about to do that
+	        throw new Exception("Melonloader internal failure");
+        }
+
+        internal static void WriteSpacer()
+        {
+	        BepInExLog.LogMessage(string.Empty);
+        }
+
+        internal static void Internal_PrintModName(ConsoleColor consoleColor, string name, string version)
+        {
+	        BepInExLog.LogMessage($"{name} v{version}");
+        }
 
         [Obsolete("Log is obsolete. Please use Msg instead.")]
         public static void Log(string txt) => Msg(txt);

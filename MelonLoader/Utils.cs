@@ -5,12 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Text;
+using BepInEx;
+using BepInEx.IL2CPP.Hook;
 using MonoMod.Utils;
 using MonoMod.Cil;
 using HarmonyLib;
 using MelonLoader.TinyJSON;
+using MonoMod.RuntimeDetour;
+
 #pragma warning disable 0618
 
 namespace MelonLoader
@@ -19,12 +22,12 @@ namespace MelonLoader
     {
         internal static void Setup()
         {
-            GameDeveloper = string.Copy(Internal_GetGameDeveloper());
-            GameName = string.Copy(Internal_GetGameName());
-            HashCode = string.Copy(Internal_GetHashCode());
+            GameDeveloper = Internal_GetGameDeveloper();
+            GameName = Internal_GetGameName();
+            HashCode = Internal_GetHashCode();
             CurrentGameAttribute = new MelonGameAttribute(GameDeveloper, GameName);
-            BaseDirectory = string.Copy(Internal_GetBaseDirectory());
-            GameDirectory = string.Copy(Internal_GetGameDirectory());
+            BaseDirectory = Internal_GetBaseDirectory();
+            GameDirectory = Internal_GetGameDirectory();
             UserDataDirectory = Path.Combine(BaseDirectory, "UserData");
             if (!Directory.Exists(UserDataDirectory))
                 Directory.CreateDirectory(UserDataDirectory);
@@ -244,49 +247,96 @@ namespace MelonLoader
         public static IntPtr GetNativeLibraryExport(this IntPtr ptr, string name)
             => NativeLibrary.GetExport(ptr, name);
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsGame32Bit();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsGameIl2Cpp();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsOldMono();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetApplicationPath();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetGameDataDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetUnityVersion();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetManagedDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void SetConsoleTitle([MarshalAs(UnmanagedType.LPStr)] string title);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetFileProductName([MarshalAs(UnmanagedType.LPStr)] string filepath);
+        public static bool IsGame32Bit()
+	        => IntPtr.Size == 4; // there will never be a situation where this is wrong. the bitness of the C# code is reliant on the launch process
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NativeHookAttach(IntPtr target, IntPtr detour);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NativeHookDetach(IntPtr target, IntPtr detour);
+        public static bool IsGameIl2Cpp()
+        {
+	        // bad news: this can be wrong in edge cases
+	        // good news: none of the games that ML has been used with that i know of fail with this
+	        // even better news: this is the implementation in ML's C++ code anyway
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string Internal_GetBaseDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetGameName();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetGameDeveloper();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetGameDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetHashCode();
+	        return File.Exists(Path.Combine(Paths.GameRootPath, "GameAssembly.dll"));
+        }
+
+        public static bool IsOldMono()
+	        => File.Exists(Path.Combine(Paths.GameRootPath, "mono.dll"));
+
+        // this is not used by anything?? C++ implementation always returns null
+        public static string GetApplicationPath()
+	        => null; // BepInEx.Paths.GameRootPath;
+
+        public static string GetGameDataDirectory()
+	        => Path.Combine(Paths.GameRootPath, $"{Paths.ProcessName}_Data");
+
+        private static string cachedUnityVersion { get; }
+	        = System.Text.RegularExpressions.Regex.Match(UnityEngine.Application.unityVersion,
+		        @"^(\d+\.\d+\.\d+(?:\.\d+)*)").Value;
+
+        public static string GetUnityVersion()
+	        => cachedUnityVersion;
+
+        public static string GetManagedDirectory()
+	        => IsGameIl2Cpp()
+		        ? Utility.CombinePaths(Paths.GameRootPath, "mono", "Managed")
+		        : Utility.CombinePaths(Paths.GameRootPath, $"{Paths.ProcessName}_Data", "Managed");
+
+        public static void SetConsoleTitle(string title) { } // stubbed out
+
+        public static string GetFileProductName(string filepath)
+	        => FileVersionInfo.GetVersionInfo(filepath).ProductName;
+
+        private static Dictionary<IntPtr, NativeDetour> InstalledHooks { get; } = new Dictionary<IntPtr, NativeDetour>();
+
+        public static void NativeHookAttach(IntPtr target, IntPtr detour)
+        {
+	        var newDetour = new NativeDetour(target, detour);
+	        newDetour.Apply();
+	        InstalledHooks[target] = newDetour;
+        }
+
+        public static void NativeHookDetach(IntPtr target, IntPtr detour)
+        {
+	        var nativeDetour = InstalledHooks[target];
+	        nativeDetour.Dispose();
+        }
+
+        public static string Internal_GetBaseDirectory()
+	        => Utility.CombinePaths(Paths.GameRootPath, "MelonLoader");
+
+        private const string UnknownItem = "UNKNOWN";
+        
+        private static string Internal_GetGameName()
+	        => AppInfo.ProductName ?? UnknownItem;
+        
+        private static string Internal_GetGameDeveloper()
+	        => AppInfo.CompanyName ?? UnknownItem;
+
+        private static string Internal_GetGameDirectory()
+	        => Paths.GameRootPath;
+
+        // seems to be a hash of Bootstrap.dll. not sure what algorithm
+        private static string Internal_GetHashCode()
+	        => "DEADBEEF";
+    }
+
+    internal static class AppInfo
+    {
+	    public static readonly string CompanyName;
+	    public static readonly string ProductName;
+
+	    static AppInfo()
+	    {
+		    // Why app.info? It's not even present on a majority of Unity games.
+		    // Yes, some developers delete them manually
+		    // Oh well...
+		    var appInfoPath = Path.Combine(Imports.GetGameDataDirectory(), "app.info");
+		    if (!File.Exists(appInfoPath))
+			    return;
+		    var lines = File.ReadAllLines(appInfoPath);
+		    string Read(string[] l, int i) => l.Length > i ? lines[i] : null;
+		    CompanyName = Read(lines, 0);
+		    ProductName = Read(lines, 1);
+	    }
     }
 }

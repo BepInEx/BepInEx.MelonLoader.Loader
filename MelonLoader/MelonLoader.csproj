@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>MelonLoader</RootNamespace>
     <AssemblyName>MelonLoader</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <LangVersion>8.0</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -25,25 +25,71 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>None</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)Output\$(Configuration)\MelonLoader\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>NET35</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BepInEx.Core">
+      <HintPath>..\libs\BepInEx.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.IL2CPP">
+      <HintPath>..\libs\BepInEx.IL2CPP.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Preloader.Core">
+      <HintPath>..\libs\BepInEx.Preloader.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\melonloader-libs\Il2Cppmscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem">
+      <HintPath>..\melonloader-libs\Il2CppSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="UnhollowerBaseLib">
+      <HintPath>..\melonloader-libs\UnhollowerBaseLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnhollowerRuntimeLib">
+      <HintPath>..\melonloader-libs\UnhollowerRuntimeLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\melonloader-libs\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\Il2CppAssemblyGenerator.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Attributes.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Extras\DelegateTypeFactory.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Extras\FastAccess.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Extras\MethodInvoker.cs" />
+    <Compile Include="Extensions\Layers\Harmony\HarmonyInstance.cs" />
+    <Compile Include="Extensions\Layers\Harmony\HarmonyMethod.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Patch.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Priority.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Tools\AccessTools.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Tools\Extensions.cs" />
+    <Compile Include="Extensions\Layers\Harmony\Tools\SymbolExtensions.cs" />
     <Compile Include="GameVersionHandler.cs" />
     <Compile Include="Libs\SharpZipLib\BZip2\BZip2.cs" />
     <Compile Include="Libs\SharpZipLib\BZip2\BZip2Constants.cs" />
@@ -113,25 +159,19 @@
     <Compile Include="Melons\FileTypes\DLL.cs" />
     <Compile Include="Melons\FileTypes\ZIP.cs" />
     <Compile Include="Preferences\ReflectiveCategory.cs" />
+    <Compile Include="SM_Il2Cpp\BONEWORKS_SceneHandler.cs" />
+    <Compile Include="SM_Il2Cpp\Component.cs" />
+    <Compile Include="SM_Il2Cpp\Coroutines.cs" />
+    <Compile Include="SM_Il2Cpp\Main.cs" />
+    <Compile Include="SM_Il2Cpp\SupportModule.cs" />
+    <Compile Include="SM_Il2Cpp\UnityMappers.cs" />
     <Compile Include="Utils\CompatibilityLayer.cs" />
     <Compile Include="Extensions\Fixes\ApplicationBase.cs" />
     <Compile Include="Extensions\Fixes\ExtraCleanup.cs" />
     <Compile Include="Extensions\Fixes\InvariantCurrentCulture.cs" />
     <Compile Include="Extensions\Fixes\QuitFix.cs" />
     <Compile Include="Extensions\Fixes\UnhandledException.cs" />
-    <Compile Include="Extensions\Il2CppAssemblyGenerator.cs" />
     <Compile Include="Extensions\Il2CppMethodPatcher.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Attributes.cs" />
-    <Compile Include="Extensions\Layers\Harmony\HarmonyInstance.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Extras\DelegateTypeFactory.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Extras\FastAccess.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Extras\MethodInvoker.cs" />
-    <Compile Include="Extensions\Layers\Harmony\HarmonyMethod.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Patch.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Priority.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Tools\AccessTools.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Tools\Extensions.cs" />
-    <Compile Include="Extensions\Layers\Harmony\Tools\SymbolExtensions.cs" />
     <Compile Include="Extensions\Layers\Melon.cs" />
     <Compile Include="Extensions\Layers\Melon\HarmonyShield.cs" />
     <Compile Include="Extensions\Layers\Melon\Imports.cs" />
@@ -200,10 +240,14 @@
     <PackageReference Include="HarmonyX">
       <Version>2.4.2</Version>
     </PackageReference>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task">
-      <Version>2.0.18.2</Version>
-    </PackageReference>
     <PackageReference Include="Samboy063.Tomlet" Version="1.3.5" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libs\SharpZipLib\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Libs\SharpZipLib\README.md" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
