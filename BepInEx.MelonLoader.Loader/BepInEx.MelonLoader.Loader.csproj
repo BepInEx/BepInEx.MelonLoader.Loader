@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MelonLoader\**" />
+    <EmbeddedResource Remove="MelonLoader\**" />
+    <None Remove="MelonLoader\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Samboy063.Tomlet" Version="1.2.0" />
   </ItemGroup>
 
@@ -54,10 +60,6 @@
       <HintPath>..\melonloader-libs\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="MelonLoader\Properties\" />
   </ItemGroup>
 
   <ItemGroup>
