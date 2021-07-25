@@ -30,6 +30,9 @@ namespace MelonLoader
             
             Core.EnableAssemblyGeneration =
                 configFile.Bind("Framework", "EnableAssemblyGeneration", false, "If true, MelonLoader will generate it's own set of unhollowed assemblies alongside BepInEx.").Value;
+            
+            Core.EnableFixes =
+                configFile.Bind("Framework", "EnableFixes", false, "If true, MelonLoader's Unity fixes will be applied. Untested and could possibly cause issues with BepInEx code.").Value;
         }
 
         #region Args
@@ -49,6 +52,7 @@ namespace MelonLoader
             public static bool EnableCompatibilityLayers { get; internal set; }
             public static bool EnableBHapticsIntegration { get; internal set; }
             public static bool EnableAssemblyGeneration { get; internal set; }
+            public static bool EnableFixes { get; internal set; }
         }
 
         public static class Il2CppAssemblyGenerator

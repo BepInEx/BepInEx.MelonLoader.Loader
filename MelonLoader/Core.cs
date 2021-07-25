@@ -12,15 +12,22 @@ namespace MelonLoader
 
         internal static int Initialize(ConfigFile configFile)
         {
-            //AppDomain curDomain = AppDomain.CurrentDomain;
+            AppDomain curDomain = AppDomain.CurrentDomain;
             HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
 
-            //Fixes.UnhandledException.Run(curDomain);
+            if (MelonLaunchOptions.Core.EnableFixes)
+            {
+                Fixes.UnhandledException.Run(curDomain);
+                Fixes.InvariantCurrentCulture.Install();
+            }
 
             try { MelonUtils.Setup(); } catch (Exception ex) { MelonLogger.Error($"MelonUtils.Setup Exception: {ex}"); throw; }
 
-            //Fixes.ApplicationBase.Run(curDomain);
-            Fixes.ExtraCleanup.Run();
+            if (MelonLaunchOptions.Core.EnableFixes)
+            {
+                Fixes.ApplicationBase.Run(curDomain);
+                Fixes.ExtraCleanup.Run();
+            }
 
             MelonPreferences.Load();
             MelonLaunchOptions.Load(configFile);
