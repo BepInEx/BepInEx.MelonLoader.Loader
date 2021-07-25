@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
 
 [assembly: InternalsVisibleTo("BepInEx.MelonLoader.Loader")]
+[assembly: TypeForwardedTo(typeof(HarmonyLib.Harmony))]
+[assembly: TypeForwardedTo(typeof(HarmonyLib.HarmonyMethod))]
 
 namespace MelonLoader
 {
