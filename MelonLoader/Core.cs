@@ -102,7 +102,9 @@ namespace MelonLoader
             MelonPreferences.Save();
 
             HarmonyInstance.UnpatchAll();
-            bHaptics.Quit();
+
+            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
+                bHaptics.Quit();
             
             Fixes.QuitFix.Run();
         }
