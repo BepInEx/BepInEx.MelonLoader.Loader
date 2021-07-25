@@ -248,95 +248,95 @@ namespace MelonLoader
             => NativeLibrary.GetExport(ptr, name);
 
         public static bool IsGame32Bit()
-	        => IntPtr.Size == 4; // there will never be a situation where this is wrong. the bitness of the C# code is reliant on the launch process
+            => IntPtr.Size == 4; // there will never be a situation where this is wrong. the bitness of the C# code is reliant on the launch process
 
         public static bool IsGameIl2Cpp()
         {
-	        // bad news: this can be wrong in edge cases
-	        // good news: none of the games that ML has been used with that i know of fail with this
-	        // even better news: this is the implementation in ML's C++ code anyway
+            // bad news: this can be wrong in edge cases
+            // good news: none of the games that ML has been used with that i know of fail with this
+            // even better news: this is the implementation in ML's C++ code anyway
 
-	        return File.Exists(Path.Combine(Paths.GameRootPath, "GameAssembly.dll"));
+            return File.Exists(Path.Combine(Paths.GameRootPath, "GameAssembly.dll"));
         }
 
         public static bool IsOldMono()
-	        => File.Exists(Path.Combine(Paths.GameRootPath, "mono.dll"));
+            => File.Exists(Path.Combine(Paths.GameRootPath, "mono.dll"));
 
         // this is not used by anything?? C++ implementation always returns null
         public static string GetApplicationPath()
-	        => null; // BepInEx.Paths.GameRootPath;
+            => null; // BepInEx.Paths.GameRootPath;
 
         public static string GetGameDataDirectory()
-	        => Path.Combine(Paths.GameRootPath, $"{Paths.ProcessName}_Data");
+            => Path.Combine(Paths.GameRootPath, $"{Paths.ProcessName}_Data");
 
         private static string cachedUnityVersion { get; }
-	        = System.Text.RegularExpressions.Regex.Match(UnityEngine.Application.unityVersion,
-		        @"^(\d+\.\d+\.\d+(?:\.\d+)*)").Value;
+            = System.Text.RegularExpressions.Regex.Match(UnityEngine.Application.unityVersion,
+                @"^(\d+\.\d+\.\d+(?:\.\d+)*)").Value;
 
         public static string GetUnityVersion()
-	        => cachedUnityVersion;
+            => cachedUnityVersion;
 
         public static string GetManagedDirectory()
-	        => IsGameIl2Cpp()
-		        ? Utility.CombinePaths(Paths.GameRootPath, "mono", "Managed")
-		        : Utility.CombinePaths(Paths.GameRootPath, $"{Paths.ProcessName}_Data", "Managed");
+            => IsGameIl2Cpp()
+                ? Utility.CombinePaths(Paths.GameRootPath, "mono", "Managed")
+                : Utility.CombinePaths(Paths.GameRootPath, $"{Paths.ProcessName}_Data", "Managed");
 
         public static void SetConsoleTitle(string title) { } // stubbed out
 
         public static string GetFileProductName(string filepath)
-	        => FileVersionInfo.GetVersionInfo(filepath).ProductName;
+            => FileVersionInfo.GetVersionInfo(filepath).ProductName;
 
         private static Dictionary<IntPtr, NativeDetour> InstalledHooks { get; } = new Dictionary<IntPtr, NativeDetour>();
 
         public static void NativeHookAttach(IntPtr target, IntPtr detour)
         {
-	        var newDetour = new NativeDetour(target, detour);
-	        newDetour.Apply();
-	        InstalledHooks[target] = newDetour;
+            var newDetour = new NativeDetour(target, detour);
+            newDetour.Apply();
+            InstalledHooks[target] = newDetour;
         }
 
         public static void NativeHookDetach(IntPtr target, IntPtr detour)
         {
-	        var nativeDetour = InstalledHooks[target];
-	        nativeDetour.Dispose();
+            var nativeDetour = InstalledHooks[target];
+            nativeDetour.Dispose();
         }
 
         public static string Internal_GetBaseDirectory()
-	        => Utility.CombinePaths(Paths.GameRootPath, "MelonLoader");
+            => Utility.CombinePaths(Paths.GameRootPath, "MelonLoader");
 
         private const string UnknownItem = "UNKNOWN";
         
         private static string Internal_GetGameName()
-	        => AppInfo.ProductName ?? UnknownItem;
+            => AppInfo.ProductName ?? UnknownItem;
         
         private static string Internal_GetGameDeveloper()
-	        => AppInfo.CompanyName ?? UnknownItem;
+            => AppInfo.CompanyName ?? UnknownItem;
 
         private static string Internal_GetGameDirectory()
-	        => Paths.GameRootPath;
+            => Paths.GameRootPath;
 
         // seems to be a hash of Bootstrap.dll. not sure what algorithm
         private static string Internal_GetHashCode()
-	        => "DEADBEEF";
+            => "DEADBEEF";
     }
 
     internal static class AppInfo
     {
-	    public static readonly string CompanyName;
-	    public static readonly string ProductName;
+        public static readonly string CompanyName;
+        public static readonly string ProductName;
 
-	    static AppInfo()
-	    {
-		    // Why app.info? It's not even present on a majority of Unity games.
-		    // Yes, some developers delete them manually
-		    // Oh well...
-		    var appInfoPath = Path.Combine(Imports.GetGameDataDirectory(), "app.info");
-		    if (!File.Exists(appInfoPath))
-			    return;
-		    var lines = File.ReadAllLines(appInfoPath);
-		    string Read(string[] l, int i) => l.Length > i ? lines[i] : null;
-		    CompanyName = Read(lines, 0);
-		    ProductName = Read(lines, 1);
-	    }
+        static AppInfo()
+        {
+            // Why app.info? It's not even present on a majority of Unity games.
+            // Yes, some developers delete them manually
+            // Oh well...
+            var appInfoPath = Path.Combine(Imports.GetGameDataDirectory(), "app.info");
+            if (!File.Exists(appInfoPath))
+                return;
+            var lines = File.ReadAllLines(appInfoPath);
+            string Read(string[] l, int i) => l.Length > i ? lines[i] : null;
+            CompanyName = Read(lines, 0);
+            ProductName = Read(lines, 1);
+        }
     }
 }

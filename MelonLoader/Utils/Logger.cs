@@ -28,16 +28,16 @@ namespace MelonLoader
 
         internal static void PushMessageToBepInEx(string namesection, string message, LogLevel level)
         {
-	        message ??= "<null>";
+            message ??= "<null>";
 
             if (!string.IsNullOrEmpty(namesection))
-	        {
-		        BepInExLog.Log(level, $"[{namesection}] {message}");
-	        }
-	        else
-	        {
-		        BepInExLog.Log(level, message);
-	        }
+            {
+                BepInExLog.Log(level, $"[{namesection}] {message}");
+            }
+            else
+            {
+                BepInExLog.Log(level, message);
+            }
         }
 
         private static void SendMsg(ConsoleColor txtcolor, string txt)
@@ -93,19 +93,19 @@ namespace MelonLoader
 
         internal static void ThrowInternalFailure(string v)
         {
-	        BepInExLog.LogError($"[{DateTime.Now}] [INTERNAL FAILURE] {v}");
-	        // process is usually killed here but i'm not about to do that
-	        throw new Exception("Melonloader internal failure");
+            BepInExLog.LogError($"[{DateTime.Now}] [INTERNAL FAILURE] {v}");
+            // process is usually killed here but i'm not about to do that
+            throw new Exception("Melonloader internal failure");
         }
 
         internal static void WriteSpacer()
         {
-	        BepInExLog.LogMessage(string.Empty);
+            BepInExLog.LogMessage(string.Empty);
         }
 
         internal static void Internal_PrintModName(ConsoleColor consoleColor, string name, string version)
         {
-	        BepInExLog.LogMessage($"{name} v{version}");
+            BepInExLog.LogMessage($"{name} v{version}");
         }
 
         [Obsolete("Log is obsolete. Please use Msg instead.")]

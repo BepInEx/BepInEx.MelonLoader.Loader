@@ -162,8 +162,8 @@ namespace MelonLoader
         public static void AddAssemblyToResolverEvent(Func<Assembly, string, Resolver> evt) => AssemblyToResolverEvents += evt;
         internal static Resolver GetResolverFromAssembly(Assembly assembly, string filepath)
         {
-	        if (AssemblyToResolverEvents == null)
-		        return null;
+            if (AssemblyToResolverEvents == null)
+                return null;
 
             Delegate[] invoke_list = AssemblyToResolverEvents.GetInvocationList();
             if (invoke_list.Length <= 0)

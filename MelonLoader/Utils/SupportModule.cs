@@ -12,7 +12,7 @@ namespace MelonLoader
             MelonLogger.Msg("Loading Support Module...");
 
             if (!MelonUtils.IsGameIl2Cpp())
-	            throw new Exception("Non-IL2CPP MelonLoader plugins are currently not supported");
+                throw new Exception("Non-IL2CPP MelonLoader plugins are currently not supported");
 
             Interface = SM_Il2Cpp.Main.Initialize(new SupportModule_From());
             return true;

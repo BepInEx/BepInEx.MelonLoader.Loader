@@ -12,28 +12,27 @@ namespace MelonLoader
 
         internal static int Initialize(ConfigFile configFile)
         {
-	        //AppDomain curDomain = AppDomain.CurrentDomain;
-	        HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
+            //AppDomain curDomain = AppDomain.CurrentDomain;
+            HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
 
-	        //Fixes.UnhandledException.Run(curDomain);
-	        Fixes.InvariantCurrentCulture.Install();
+            //Fixes.UnhandledException.Run(curDomain);
 
-	        try { MelonUtils.Setup(); } catch (Exception ex) { MelonLogger.Error($"MelonUtils.Setup Exception: {ex}"); throw; }
+            try { MelonUtils.Setup(); } catch (Exception ex) { MelonLogger.Error($"MelonUtils.Setup Exception: {ex}"); throw; }
 
-	        //Fixes.ApplicationBase.Run(curDomain);
-	        Fixes.ExtraCleanup.Run();
+            //Fixes.ApplicationBase.Run(curDomain);
+            Fixes.ExtraCleanup.Run();
 
-	        MelonPreferences.Load();
-	        MelonLaunchOptions.Load(configFile);
+            MelonPreferences.Load();
+            MelonLaunchOptions.Load(configFile);
 
             if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
-				MelonCompatibilityLayer.Setup();
+                MelonCompatibilityLayer.Setup();
             
             if (MelonLaunchOptions.Core.EnablePatchShield)
                 PatchShield.Install();
 
             if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
-				bHaptics.Load();
+                bHaptics.Load();
 
             if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
                 MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnPreInitialization);
@@ -46,20 +45,20 @@ namespace MelonLoader
 
         internal static int PreStart()
         {
-			if (!MelonUtils.IsGameIl2Cpp())
-				GameVersionHandler.Setup();
+            if (!MelonUtils.IsGameIl2Cpp())
+                GameVersionHandler.Setup();
 
-			MelonHandler.OnApplicationEarlyStart();
+            MelonHandler.OnApplicationEarlyStart();
 
             if (MelonUtils.IsGameIl2Cpp())
             {
-				if (MelonLaunchOptions.Core.EnableAssemblyGeneration)
-				{
-					if (!Il2CppAssemblyGenerator.Run())
-						return 1;
-				}
+                if (MelonLaunchOptions.Core.EnableAssemblyGeneration)
+                {
+                    if (!Il2CppAssemblyGenerator.Run())
+                        return 1;
+                }
 
-				HarmonyLib.Public.Patching.PatchManager.ResolvePatcher += HarmonyIl2CppMethodPatcher.TryResolve;
+                HarmonyLib.Public.Patching.PatchManager.ResolvePatcher += HarmonyIl2CppMethodPatcher.TryResolve;
 
                 GameVersionHandler.Setup();
             }
@@ -75,7 +74,7 @@ namespace MelonLoader
             AddUnityDebugLog();
 
             if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
-				bHaptics.Start();
+                bHaptics.Start();
 
             if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
                 MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnApplicationStart);
