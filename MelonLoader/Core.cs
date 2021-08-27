@@ -5,6 +5,7 @@ using BepInEx.Configuration;
 [assembly: InternalsVisibleTo("BepInEx.MelonLoader.Loader")]
 [assembly: TypeForwardedTo(typeof(HarmonyLib.Harmony))]
 [assembly: TypeForwardedTo(typeof(HarmonyLib.HarmonyMethod))]
+[assembly: TypeForwardedTo(typeof(HarmonyLib.AccessTools))]
 
 namespace MelonLoader
 {
