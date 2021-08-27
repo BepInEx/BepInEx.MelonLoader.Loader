@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using BepInEx;
-using BepInEx.IL2CPP.Hook;
 using MonoMod.Utils;
 using MonoMod.Cil;
 using HarmonyLib;

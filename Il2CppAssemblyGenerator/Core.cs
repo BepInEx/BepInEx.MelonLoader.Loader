@@ -12,6 +12,7 @@ namespace MelonLoader.Il2CppAssemblyGenerator
         internal static string BasePath = null;
         internal static string GameAssemblyPath = null;
         internal static string ManagedPath = null;
+        internal static string AssemblyOutputPath = null;
 
         internal static WebClient webClient = null;
 
@@ -33,7 +34,8 @@ namespace MelonLoader.Il2CppAssemblyGenerator
             AssemblyGenerationNeeded = MelonLaunchOptions.Il2CppAssemblyGenerator.ForceRegeneration;
 
             GameAssemblyPath = Path.Combine(MelonUtils.GameDirectory, "GameAssembly.dll");
-            ManagedPath = string.Copy(MelonUtils.GetManagedDirectory());
+            ManagedPath = MelonUtils.GetManagedDirectory();
+            AssemblyOutputPath = Path.Combine(MelonUtils.BaseDirectory, "AssemblyOutput");
 
             BasePath = Path.GetDirectoryName(typeof(Core).Assembly.Location);
         }
@@ -130,7 +132,7 @@ namespace MelonLoader.Il2CppAssemblyGenerator
             for (int i = 0; i < Config.Values.OldFiles.Count; i++)
             {
                 string filename = Config.Values.OldFiles[i];
-                string filepath = Path.Combine(ManagedPath, filename);
+                string filepath = Path.Combine(AssemblyOutputPath, filename);
                 if (File.Exists(filepath))
                 {
                     MelonLogger.Msg("Deleting " + filename);
@@ -142,6 +144,8 @@ namespace MelonLoader.Il2CppAssemblyGenerator
 
         private static void OldFiles_LAM()
         {
+	        Directory.CreateDirectory(AssemblyOutputPath);
+
             string[] filepathtbl = Directory.GetFiles(il2cppassemblyunhollower.Output);
             for (int i = 0; i < filepathtbl.Length; i++)
             {
@@ -149,7 +153,7 @@ namespace MelonLoader.Il2CppAssemblyGenerator
                 string filename = Path.GetFileName(filepath);
                 MelonLogger.Msg("Moving " + filename);
                 Config.Values.OldFiles.Add(filename);
-                string newfilepath = Path.Combine(ManagedPath, filename);
+                string newfilepath = Path.Combine(AssemblyOutputPath, filename);
                 if (File.Exists(newfilepath))
                     File.Delete(newfilepath);
                 File.Move(filepath, newfilepath);
