@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyAttributes.cs" />
     <Compile Include="Extensions\Il2CppAssemblyGenerator.cs" />
     <Compile Include="Extensions\Layers\Harmony\Attributes.cs" />
     <Compile Include="Extensions\Layers\Harmony\Extras\DelegateTypeFactory.cs" />
