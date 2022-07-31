@@ -99,7 +99,7 @@ namespace MelonLoader.Preferences.IO
                 ? $"'{key}'"
                 : $"\"{key}\"";
 
-        internal void InsertIntoDocument(string category, string key, TomlValue value)
+        internal void InsertIntoDocument(string category, string key, TomlValue value, bool should_inline = false)
         {
             if (!document.ContainsKey(category))
                 document.PutValue(category, new TomlTable());
@@ -107,6 +107,7 @@ namespace MelonLoader.Preferences.IO
             try
             {
                 var categoryTable = document.GetSubTable(category);
+                categoryTable.ForceNoInline = !should_inline;
                 categoryTable.PutValue(QuoteKey(key), value);
             }
             catch (TomlTypeMismatchException)
@@ -116,6 +117,70 @@ namespace MelonLoader.Preferences.IO
             catch (TomlNoSuchValueException)
             {
                 //Ignore
+            }
+        }
+
+        internal bool RemoveEntryFromDocument(string category, string key)
+        {
+            if (!document.ContainsKey(category))
+                return false;
+
+            try
+            {
+                var categoryTable = document.GetSubTable(category);
+                return categoryTable.Entries.Remove(key);
+            }
+            catch (TomlTypeMismatchException)
+            {
+                return false;
+            }
+            catch (TomlNoSuchValueException)
+            {
+                return false;
+            }
+        }
+
+        internal bool RemoveCategoryFromDocument(string category)
+        {
+            if (!document.ContainsKey(category))
+                return false;
+            try
+            {
+                return document.Entries.Remove(category);
+            }
+            catch (TomlTypeMismatchException)
+            {
+                return false;
+            }
+            catch (TomlNoSuchValueException)
+            {
+                return false;
+            }
+        }
+
+        internal bool RenameEntryInDocument(string category, string key, string newKey)
+        {
+            if (!document.ContainsKey(category))
+                return false;
+
+            try
+            {
+                var categoryTable = document.GetSubTable(category);
+                if (!categoryTable.Entries.ContainsKey(key) || categoryTable.Entries.ContainsKey(newKey))
+                    return false;
+
+                TomlValue value = categoryTable.Entries[key];
+                categoryTable.Entries.Remove(key);
+                categoryTable.Entries.Add(newKey, value);
+                return true;
+            }
+            catch (TomlTypeMismatchException)
+            {
+                return false;
+            }
+            catch (TomlNoSuchValueException)
+            {
+                return false;
             }
         }
 
