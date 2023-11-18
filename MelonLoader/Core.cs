@@ -1,113 +1,82 @@
 ﻿using System;
 using System.Diagnostics;
-using BepInEx.Configuration;
-using BepInEx.Logging;
 using MelonLoader.InternalUtils;
 using MelonLoader.MonoInternals;
+using bHapticsLib;
+#pragma warning disable IDE0051 // Prevent the IDE from complaining about private unreferenced methods
 
 namespace MelonLoader
 {
-    // Based on commit: 80025c4445b5791d1f8195de9b03d0e84c1954cb
 	internal static class Core
     {
-        internal static HarmonyLib.Harmony HarmonyInstance = null;
-        internal static bool IsIl2Cpp = false;
+        internal static HarmonyLib.Harmony HarmonyInstance;
 
-        internal static int Initialize(ConfigFile config, bool isIl2Cpp)
+        private static int Initialize()
         {
-            IsIl2Cpp = isIl2Cpp;
-            MelonLaunchOptions.Load(config);
-
             AppDomain curDomain = AppDomain.CurrentDomain;
-            if (MelonLaunchOptions.Core.EnableFixes)
-            {
-                Fixes.UnhandledException.Install(curDomain);
-                Fixes.ServerCertificateValidation.Install();    
-            }
+            Fixes.UnhandledException.Install(curDomain);
+            Fixes.ServerCertificateValidation.Install();
 
             MelonUtils.Setup(curDomain);
             Assertions.LemonAssertMapping.Setup();
-            MelonHandler.Setup();
 
-            if (!MonoResolveManager.Setup())
+            if (!MonoLibrary.Setup()
+                || !MonoResolveManager.Setup())
                 return 1;
 
             HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
 
-            if (MelonLaunchOptions.Core.EnableFixes)
-            {
-                Fixes.ForcedCultureInfo.Install();
-                Fixes.InstancePatchFix.Install();
-                Fixes.ProcessFix.Install();    
-            }
-
-            if (MelonLaunchOptions.Core.EnablePatchShield)
-                PatchShield.Install();
+            Fixes.ForcedCultureInfo.Install();
+            Fixes.InstancePatchFix.Install();
+            Fixes.ProcessFix.Install();
+            PatchShield.Install();
 
             MelonPreferences.Load();
-            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
-                bHaptics.Load();
 
-            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
-            {
-                MelonCompatibilityLayer.Setup();
-                MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnPreInitialization);    
-            }
+            MelonCompatibilityLayer.LoadModules();
 
-            MelonHandler.LoadPlugins();
-            MelonHandler.OnPreInitialization();
+            bHapticsManager.Connect(BuildInfo.Name, UnityInformationHandler.GameName);
+
+            MelonHandler.LoadMelonsFromDirectory<MelonPlugin>(MelonHandler.PluginsDirectory);
+            MelonEvents.MelonHarmonyEarlyInit.Invoke();
+            MelonEvents.OnPreInitialization.Invoke();
 
             return 0;
         }
 
-        internal static int PreStart()
+        private static int PreStart()
         {
-            MelonHandler.OnApplicationEarlyStart();
-            if (MelonLaunchOptions.Core.EnableAssemblyGeneration && MelonUtils.IsGameIl2Cpp())
-                Il2CppAssemblyGenerator.Run();
-            return 1;
+            MelonEvents.OnApplicationEarlyStart.Invoke();
+            return MelonStartScreen.LoadAndRun(Il2CppGameSetup);
         }
 
         private static int Il2CppGameSetup()
-            => (MelonUtils.IsGameIl2Cpp()
-                && !Il2CppAssemblyGenerator.Run())
-                ? 1 : 0;
+            => Il2CppAssemblyGenerator.Run() ? 0 : 1;
 
-        internal static int Start()
+        private static int Start()
         {
-            bHaptics.Start();
+            MelonEvents.OnPreModsLoaded.Invoke();
+            MelonHandler.LoadMelonsFromDirectory<MelonMod>(MelonHandler.ModsDirectory);
 
-            MelonHandler.OnApplicationStart_Plugins();
-            MelonHandler.LoadMods();
-            MelonHandler.OnPreSupportModule();
-
+            MelonEvents.OnPreSupportModule.Invoke();
             if (!SupportModule.Setup())
                 return 1;
-            
-            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
-                MelonCompatibilityLayer.SetupModules(MelonCompatibilityLayer.SetupType.OnApplicationStart);
+
             AddUnityDebugLog();
-            MelonHandler.OnApplicationStart_Mods();
-            MelonStartScreen.DisplayModLoadIssuesIfNeeded();
+            RegisterTypeInIl2Cpp.SetReady();
+
+            MelonEvents.MelonHarmonyInit.Invoke();
+            MelonEvents.OnApplicationStart.Invoke();
 
             return 0;
-        }
-
-        internal static void OnApplicationLateStart()
-        {
-            MelonHandler.OnApplicationLateStart_Plugins();
-            MelonHandler.OnApplicationLateStart_Mods();
-            MelonStartScreen.Finish();
         }
 
         internal static void Quit()
         {
-            MelonHandler.OnApplicationQuit();
             MelonPreferences.Save();
 
             HarmonyInstance.UnpatchSelf();
-            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
-                bHaptics.Quit();
+            bHapticsManager.Disconnect();
 
             MelonLogger.Flush();
 
@@ -117,9 +86,11 @@ namespace MelonLoader
 
         private static void AddUnityDebugLog()
         {
-            SupportModule.Interface.UnityDebugLog("--------------------------------------------------------------------------------------------------");
-            SupportModule.Interface.UnityDebugLog("~   This Game has been MODIFIED using MelonLoader. DO NOT report any issues to the Developers!   ~");
-            SupportModule.Interface.UnityDebugLog("--------------------------------------------------------------------------------------------------");
+            var msg = "~   This Game has been MODIFIED using MelonLoader. DO NOT report any issues to the Game Developers!   ~";
+            var line = new string('-', msg.Length);
+            SupportModule.Interface.UnityDebugLog(line);
+            SupportModule.Interface.UnityDebugLog(msg);
+            SupportModule.Interface.UnityDebugLog(line);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle(MelonLoader.BuildInfo.Description)]
@@ -12,5 +11,3 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion(MelonLoader.BuildInfo.Version)]
 [assembly: AssemblyFileVersion(MelonLoader.BuildInfo.Version)]
 [assembly: MelonLoader.PatchShield]
-[assembly: InternalsVisibleTo("BepInEx.MelonLoader.Loader.UnityMono")]
-[assembly: InternalsVisibleTo("BepInEx.MelonLoader.Loader.IL2CPP")]

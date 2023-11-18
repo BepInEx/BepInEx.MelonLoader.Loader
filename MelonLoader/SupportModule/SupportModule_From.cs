@@ -2,16 +2,43 @@
 {
     internal class SupportModule_From : ISupportModule_From
     {
-        public void OnApplicationLateStart() => Core.OnApplicationLateStart();
-        public void OnSceneWasLoaded(int buildIndex, string sceneName) => MelonHandler.OnSceneWasLoaded(buildIndex, sceneName);
-        public void OnSceneWasInitialized(int buildIndex, string sceneName) => MelonHandler.OnSceneWasInitialized(buildIndex, sceneName);
-        public void OnSceneWasUnloaded(int buildIndex, string sceneName) => MelonHandler.OnSceneWasUnloaded(buildIndex, sceneName);
-        public void Update() => MelonHandler.OnUpdate();
-        public void FixedUpdate() => MelonHandler.OnFixedUpdate();
-        public void LateUpdate() => MelonHandler.OnLateUpdate();
-        public void OnGUI() => MelonHandler.OnGUI();
-        public void Quit() => Core.Quit();
-        public void BONEWORKS_OnLoadingScreen() => MelonHandler.BONEWORKS_OnLoadingScreen();
-        public void SetUnhollowerSupportInterface(UnhollowerSupport.Interface inter) { if (UnhollowerSupport.SMInterface == null) UnhollowerSupport.SMInterface = inter; }
+        public void OnApplicationLateStart()
+            => MelonEvents.OnApplicationLateStart.Invoke();
+
+        public void OnSceneWasLoaded(int buildIndex, string sceneName)
+            => MelonEvents.OnSceneWasLoaded.Invoke(buildIndex, sceneName);
+
+        public void OnSceneWasInitialized(int buildIndex, string sceneName)
+            => MelonEvents.OnSceneWasInitialized.Invoke(buildIndex, sceneName);
+
+        public void OnSceneWasUnloaded(int buildIndex, string sceneName)
+            => MelonEvents.OnSceneWasUnloaded.Invoke(buildIndex, sceneName);
+
+        public void Update()
+            => MelonEvents.OnUpdate.Invoke();
+
+        public void FixedUpdate()
+            => MelonEvents.OnFixedUpdate.Invoke();
+
+        public void LateUpdate()
+            => MelonEvents.OnLateUpdate.Invoke();
+
+        public void OnGUI()
+            => MelonEvents.OnGUI.Invoke();
+
+        public void Quit()
+            => MelonEvents.OnApplicationQuit.Invoke();
+
+        public void DefiniteQuit()
+        {
+            MelonEvents.OnApplicationDefiniteQuit.Invoke();
+            Core.Quit();
+        }
+
+        public void SetUnhollowerSupportInterface(UnhollowerSupport.Interface unhollower)
+        {
+            if (UnhollowerSupport.SMInterface == null)
+                UnhollowerSupport.SMInterface = unhollower;
+        }
     }
 }

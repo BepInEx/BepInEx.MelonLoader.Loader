@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using BepInEx;
 
 namespace MelonLoader.MonoInternals.ResolveInternals
 {
@@ -12,12 +11,7 @@ namespace MelonLoader.MonoInternals.ResolveInternals
 
         internal static bool Setup()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                if (!Utility.TryParseAssemblyName(args.Name, out var assemblyName))
-                    return null;
-                return Resolve(assemblyName.Name, (ushort)assemblyName.Version.Major, (ushort)assemblyName.Version.Minor, (ushort)assemblyName.Version.Build, (ushort)assemblyName.Version.Revision, true);
-            };
+            InstallHooks();
 
             // Setup all Loaded Assemblies
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -78,5 +72,8 @@ namespace MelonLoader.MonoInternals.ResolveInternals
             // Run Passthrough Events
             MonoResolveManager.SafeInvoke_OnAssemblyLoad(assembly);
         }
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static void InstallHooks();
     }
 }

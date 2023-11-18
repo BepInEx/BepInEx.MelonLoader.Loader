@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using BepInEx.Logging;
 
 namespace MelonLoader.MonoInternals.ResolveInternals
 {
@@ -62,22 +61,22 @@ namespace MelonLoader.MonoInternals.ResolveInternals
             {
                 string folderpath = enumerator.Current.Path;
 
-                string filepath = Directory.GetFiles(folderpath
-                ).FirstOrDefault(x => !string.IsNullOrEmpty(x)
-                                      && Path.GetExtension(x).ToLowerInvariant().Equals(".dll")
-                                      && Path.GetFileName(x).Equals($"{requested_name}.dll"));
+                string filepath = Directory.GetFiles(folderpath).Where(x =>
+                    !string.IsNullOrEmpty(x)
+                    && Path.GetExtension(x).ToLowerInvariant().Equals(".dll")
+                    && Path.GetFileName(x).Equals($"{requested_name}.dll")
+                ).FirstOrDefault();
 
                 if (string.IsNullOrEmpty(filepath))
                     continue;
 
-                try
-                {
-                    return Assembly.LoadFile(filepath);
-                } catch (Exception e)
-                {
-                    MelonLogger.Msg(e.ToString());
-                    return null;
-                }
+                IntPtr assemblyptr = MonoLibrary.Instance.mono_assembly_open_full(Marshal.StringToHGlobalAnsi(filepath), IntPtr.Zero, false);
+                if (assemblyptr == IntPtr.Zero)
+                    continue;
+
+                IntPtr assemblyReflectionPtr = MonoLibrary.Instance.mono_assembly_get_object(MonoLibrary.GetRootDomainPtr(), assemblyptr);
+
+                return MonoLibrary.CastManagedAssemblyPtr(assemblyReflectionPtr);
             }
 
             return null;

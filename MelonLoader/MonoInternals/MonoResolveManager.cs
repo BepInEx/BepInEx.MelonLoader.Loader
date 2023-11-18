@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 using MelonLoader.MonoInternals.ResolveInternals;
 
@@ -12,9 +11,11 @@ namespace MelonLoader.MonoInternals
             if (!AssemblyManager.Setup())
                 return false;
 
+
             // Setup Search Directories
             string[] searchdirlist =
             {
+                MelonUtils.MelonLoaderDirectory,
                 MelonUtils.UserLibsDirectory,
                 MelonHandler.PluginsDirectory,
                 MelonHandler.ModsDirectory,
