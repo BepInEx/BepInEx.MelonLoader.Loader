@@ -45,6 +45,9 @@ namespace MelonLoader
             if (MelonLaunchOptions.Core.EnablePatchShield)
 				PatchShield.Install();
 
+            if (MelonLaunchOptions.Core.EnableObfuscationCheck)
+	            ObfuscationCheck.Initialize();
+
             MelonPreferences.Load();
 
             if (MelonLaunchOptions.Core.EnableCompatibilityLayers)

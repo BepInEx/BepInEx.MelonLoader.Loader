@@ -38,6 +38,9 @@ namespace MelonLoader
             Core.EnablePatchShield =
                 config.Bind("Framework", "EnablePatchShield", true, "If true, configures Harmony in such a way that prevents patching critical / sensitive code. Some plugins will refuse to load if this is disabled.").Value;
 
+            Core.EnableObfuscationCheck =
+	            config.Bind("Framework", "EnableObfuscationCheck", false, "If true, the Mono runtime will refuse to load assemblies that have been obfuscated. Some plugins (notably VRCMG plugins) will refuse to load if this is disabled.").Value;
+
             Core.EnableCompatibilityLayers =
                 config.Bind("Framework", "EnableCompatibilityLayers", true, "If true, MelonLoader will load compatibility layer modules so it can load other modloader plugins (such as IPA and MDML), and other misc. integrations.\nIs required to remain true, as disabling this seems to break regular plugin loading.").Value;
 
@@ -126,6 +129,7 @@ namespace MelonLoader
             public static bool StartScreen { get; internal set; } = true;
             public static string UnityVersion { get; internal set; }
             public static bool EnablePatchShield { get; internal set; }
+            public static bool EnableObfuscationCheck { get; internal set; }
             public static bool EnableCompatibilityLayers { get; internal set; }
             public static bool EnableBHapticsIntegration { get; internal set; }
             public static bool EnableAssemblyGeneration { get; internal set; }
