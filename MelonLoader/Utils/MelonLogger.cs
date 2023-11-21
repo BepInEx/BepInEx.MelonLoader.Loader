@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using BepInEx.Logging;
 
 namespace MelonLoader
 {
@@ -98,20 +99,40 @@ namespace MelonLoader
             public void WriteLine(ConsoleColor color, int length = 30) => MelonLogger.WriteLine(color, length);
         }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Internal_Msg(ConsoleColor namesection_color, ConsoleColor txt_color, string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Internal_Warning(string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Internal_Error(string namesection, string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void ThrowInternalFailure(string txt);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void WriteSpacer();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Internal_PrintModName(ConsoleColor meloncolor, ConsoleColor authorcolor, string name, string author, string version, string id);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        internal extern static void Flush();
+        public static ManualLogSource BepInExLog = Logger.CreateLogSource("MelonLoader");
+        
+        internal static void PushMessageToBepInEx(string namesection, string message, LogLevel level)
+        {
+            message ??= "null";
+
+            if (!string.IsNullOrEmpty(namesection))
+                BepInExLog.Log(level, $"[{namesection}] {message}");
+            else
+                BepInExLog.Log(level, message);
+        }
+
+        internal static void Internal_Msg(ConsoleColor namesection_color, ConsoleColor txt_color, string namesection, string txt) => PushMessageToBepInEx(namesection, txt, LogLevel.Message);
+
+        internal static void Internal_Warning(string namesection, string txt) => PushMessageToBepInEx(namesection, txt, LogLevel.Warning);
+        internal static void Internal_Error(string namesection, string txt) => PushMessageToBepInEx(namesection, txt, LogLevel.Error);
+        internal static void ThrowInternalFailure(string v)
+        {
+            BepInExLog.LogError($"[{DateTime.Now}] [INTERNAL FAILURE] {v}");
+            // process is usually killed here but i'm not about to do that
+            throw new Exception("Melonloader internal failure");
+        }
+        internal static void WriteSpacer()
+        {
+            BepInExLog.LogMessage(string.Empty);
+        }
+
+        internal static void Internal_PrintModName(ConsoleColor meloncolor, ConsoleColor authorcolor, string name,
+            string author, string version, string id)
+        {
+            BepInExLog.LogMessage($"{name} v{version} by {author} [{id}]");
+        }
+        
+        internal static void Flush() {}
 
         [Obsolete("Log is obsolete. Please use Msg instead.")]
         public static void Log(string txt) => Msg(txt);

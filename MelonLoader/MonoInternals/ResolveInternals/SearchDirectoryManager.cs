@@ -61,22 +61,22 @@ namespace MelonLoader.MonoInternals.ResolveInternals
             {
                 string folderpath = enumerator.Current.Path;
 
-                string filepath = Directory.GetFiles(folderpath).Where(x =>
+                string filepath = Directory.GetFiles(folderpath).FirstOrDefault(x =>
                     !string.IsNullOrEmpty(x)
                     && Path.GetExtension(x).ToLowerInvariant().Equals(".dll")
-                    && Path.GetFileName(x).Equals($"{requested_name}.dll")
-                ).FirstOrDefault();
+                    && Path.GetFileName(x).Equals($"{requested_name}.dll"));
 
                 if (string.IsNullOrEmpty(filepath))
                     continue;
 
-                IntPtr assemblyptr = MonoLibrary.Instance.mono_assembly_open_full(Marshal.StringToHGlobalAnsi(filepath), IntPtr.Zero, false);
-                if (assemblyptr == IntPtr.Zero)
-                    continue;
-
-                IntPtr assemblyReflectionPtr = MonoLibrary.Instance.mono_assembly_get_object(MonoLibrary.GetRootDomainPtr(), assemblyptr);
-
-                return MonoLibrary.CastManagedAssemblyPtr(assemblyReflectionPtr);
+                try
+                {
+                    return Assembly.LoadFile(filepath);
+                } catch (Exception e)
+                {
+                    MelonLogger.Msg(e.ToString());
+                    return null;
+                }
             }
 
             return null;

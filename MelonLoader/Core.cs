@@ -3,6 +3,8 @@ using System.Diagnostics;
 using MelonLoader.InternalUtils;
 using MelonLoader.MonoInternals;
 using bHapticsLib;
+using BepInEx.Configuration;
+
 #pragma warning disable IDE0051 // Prevent the IDE from complaining about private unreferenced methods
 
 namespace MelonLoader
@@ -10,32 +12,46 @@ namespace MelonLoader
 	internal static class Core
     {
         internal static HarmonyLib.Harmony HarmonyInstance;
+        internal static bool IsIl2Cpp = false;
 
-        private static int Initialize()
+        internal static int Initialize(ConfigFile config, bool isIl2Cpp)
         {
+            IsIl2Cpp = isIl2Cpp;
+            MelonLaunchOptions.LoadConfig(config);
+
             AppDomain curDomain = AppDomain.CurrentDomain;
-            Fixes.UnhandledException.Install(curDomain);
-            Fixes.ServerCertificateValidation.Install();
+
+            if (MelonLaunchOptions.Core.EnableFixes)
+            {
+	            Fixes.UnhandledException.Install(curDomain);
+	            Fixes.ServerCertificateValidation.Install();
+            }
 
             MelonUtils.Setup(curDomain);
             Assertions.LemonAssertMapping.Setup();
 
-            if (!MonoLibrary.Setup()
-                || !MonoResolveManager.Setup())
+            if (!MonoResolveManager.Setup())
                 return 1;
 
             HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
 
-            Fixes.ForcedCultureInfo.Install();
-            Fixes.InstancePatchFix.Install();
-            Fixes.ProcessFix.Install();
-            PatchShield.Install();
+            if (MelonLaunchOptions.Core.EnableFixes)
+            {
+	            Fixes.ForcedCultureInfo.Install();
+	            Fixes.InstancePatchFix.Install();
+	            Fixes.ProcessFix.Install();
+            }
+
+            if (MelonLaunchOptions.Core.EnablePatchShield)
+				PatchShield.Install();
 
             MelonPreferences.Load();
 
-            MelonCompatibilityLayer.LoadModules();
+            if (MelonLaunchOptions.Core.EnableCompatibilityLayers)
+				MelonCompatibilityLayer.LoadModules();
 
-            bHapticsManager.Connect(BuildInfo.Name, UnityInformationHandler.GameName);
+            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
+				bHapticsManager.Connect(BuildInfo.Name, UnityInformationHandler.GameName);
 
             MelonHandler.LoadMelonsFromDirectory<MelonPlugin>(MelonHandler.PluginsDirectory);
             MelonEvents.MelonHarmonyEarlyInit.Invoke();
@@ -44,16 +60,16 @@ namespace MelonLoader
             return 0;
         }
 
-        private static int PreStart()
+        internal static int PreStart()
         {
             MelonEvents.OnApplicationEarlyStart.Invoke();
-            return MelonStartScreen.LoadAndRun(Il2CppGameSetup);
+            
+            if (MelonLaunchOptions.Core.EnableAssemblyGeneration && MelonUtils.IsGameIl2Cpp())
+                Il2CppAssemblyGenerator.Run();
+            return 1;
         }
 
-        private static int Il2CppGameSetup()
-            => Il2CppAssemblyGenerator.Run() ? 0 : 1;
-
-        private static int Start()
+        internal static int Start()
         {
             MelonEvents.OnPreModsLoaded.Invoke();
             MelonHandler.LoadMelonsFromDirectory<MelonMod>(MelonHandler.ModsDirectory);
@@ -76,7 +92,9 @@ namespace MelonLoader
             MelonPreferences.Save();
 
             HarmonyInstance.UnpatchSelf();
-            bHapticsManager.Disconnect();
+
+            if (MelonLaunchOptions.Core.EnableBHapticsIntegration)
+				bHapticsManager.Disconnect();
 
             MelonLogger.Flush();
 

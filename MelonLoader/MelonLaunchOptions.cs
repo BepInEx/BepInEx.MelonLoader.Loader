@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BepInEx.Configuration;
 
 namespace MelonLoader
 {
@@ -18,7 +19,39 @@ namespace MelonLoader
             Logger.Setup();
         }
 
-        internal static void Load()
+        internal static void LoadConfig(ConfigFile config)
+        {
+            Core.DebugMode =
+                config.Bind("LaunchArguments", "DebugMode", false, "Launches MelonLoader in debug mode, i.e. makes everything more verbose").Value;
+            const string loadModeDescription = "Sets the loading mode for {0}.\nNORMAL: Does not load {0} ending with .dev.dll\nDEV: Only loads {0} ending with .dev.dll\nBOTH: Loads all .dll files";
+            Core.LoadMode_Plugins =
+                config.Bind("LaunchArguments", "LoadMode_Plugins", Core.LoadModeEnum.NORMAL, string.Format(loadModeDescription, "plugins")).Value;
+            Core.LoadMode_Mods =
+                config.Bind("LaunchArguments", "LoadMode_Mods", Core.LoadModeEnum.NORMAL, string.Format(loadModeDescription, "mods")).Value;
+
+            Core.QuitFix =
+                config.Bind("LaunchArguments", "QuitFix", false, "Ensures that if a mod / plugin / MelonLoader itself requests the game to close, the game's process will be forcefully terminated if it does not close").Value;
+
+            Core.StartScreen =
+                config.Bind("LaunchArguments", "ShowStartScreen", false, "Enables the MelonLoader loading screen on game boot.").Value;
+            
+            Core.EnablePatchShield =
+                config.Bind("Framework", "EnablePatchShield", true, "If true, configures Harmony in such a way that prevents patching critical / sensitive code. Some plugins will refuse to load if this is disabled.").Value;
+
+            Core.EnableCompatibilityLayers =
+                config.Bind("Framework", "EnableCompatibilityLayers", true, "If true, MelonLoader will load compatibility layer modules so it can load other modloader plugins (such as IPA and MDML), and other misc. integrations.\nIs required to remain true, as disabling this seems to break regular plugin loading.").Value;
+
+            Core.EnableBHapticsIntegration =
+                config.Bind("Framework", "EnableBHapticsIntegration", true, "If true, MelonLoader will load its BHaptics library module.").Value;
+            
+            Core.EnableAssemblyGeneration =
+                config.Bind("Framework", "EnableAssemblyGeneration", false, "If true, MelonLoader will generate it's own set of unhollowed assemblies alongside BepInEx.").Value;
+            
+            Core.EnableFixes =
+                config.Bind("Framework", "EnableFixes", false, "If true, MelonLoader's Unity fixes will be applied. Untested and could possibly cause issues with BepInEx code.").Value;
+        }
+
+        internal static void LoadCLI()
         {
             List<string> foundOptions = new List<string>();
 
@@ -92,6 +125,12 @@ namespace MelonLoader
             public static bool QuitFix { get; internal set; }
             public static bool StartScreen { get; internal set; } = true;
             public static string UnityVersion { get; internal set; }
+            public static bool EnablePatchShield { get; internal set; }
+            public static bool EnableCompatibilityLayers { get; internal set; }
+            public static bool EnableBHapticsIntegration { get; internal set; }
+            public static bool EnableAssemblyGeneration { get; internal set; }
+            public static bool EnableFixes { get; internal set; }
+            public static bool DebugMode { get; internal set; }
 
             internal static void Setup()
             {

@@ -58,8 +58,6 @@ namespace MelonLoader.InternalUtils
                 GameDeveloper = DefaultInfo;
             if (string.IsNullOrEmpty(GameName))
                 GameName = DefaultInfo;
-
-            SetDefaultConsoleTitleWithGameName(GameName, GameVersion);
             if (string.IsNullOrEmpty(GameVersion))
                 GameVersion = DefaultInfo;
 
@@ -249,9 +247,5 @@ namespace MelonLoader.InternalUtils
 
             return UnityVersion.Parse(verString.ToString().Trim());
         }
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static void SetDefaultConsoleTitleWithGameName([MarshalAs(UnmanagedType.LPStr)] string GameName, [MarshalAs(UnmanagedType.LPStr)] string GameVersion = null);
     }
 }

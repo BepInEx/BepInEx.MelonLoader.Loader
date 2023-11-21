@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using MonoMod.Cil;
@@ -15,7 +14,10 @@ using MelonLoader.TinyJSON;
 using MelonLoader.InternalUtils;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+using BepInEx;
 using MelonLoader.Lemons.Cryptography;
+using MonoMod.RuntimeDetour;
+
 #pragma warning disable 0618
 
 namespace MelonLoader
@@ -41,8 +43,7 @@ namespace MelonLoader
                 Directory.CreateDirectory(UserLibsDirectory);
 
             MelonLoaderDirectory = Path.GetDirectoryName(typeof(MelonUtils).Assembly.Location);
-
-            MelonLaunchOptions.Load();
+            
             MelonHandler.Setup();
             UnityInformationHandler.Setup();
 
@@ -370,9 +371,8 @@ namespace MelonLoader
 
         public static ClassPackageFile LoadIncludedClassPackage(this AssetsManager assetsManager)
         {
-            ClassPackageFile classPackage = null;
-            using (MemoryStream mstream = new(Properties.Resources.classdata))
-                classPackage = assetsManager.LoadClassPackage(mstream);
+	        using var mstream = typeof(MelonUtils).Assembly.GetManifestResourceStream("MelonLoader.Resources.classdata.tpk");
+            var classPackage = assetsManager.LoadClassPackage(mstream);
             return classPackage;
         }
 
@@ -385,43 +385,35 @@ namespace MelonLoader
         [Obsolete("MelonLoader.MelonUtils.GameVersion is obsolete. Please use MelonLoader.InternalUtils.UnityInformationHandler.GameVersion instead.")]
         public static string GameVersion { get => UnityInformationHandler.GameVersion; }
 
+        public static bool IsGame32Bit() => IntPtr.Size == 4; // the bitness of the C# code is reliant on the launch process
+        public  static bool IsGameIl2Cpp() => Core.IsIl2Cpp; // reported by the loader itself
+        public static bool IsOldMono() => File.Exists(Path.Combine(Paths.GameRootPath, "mono.dll"));
+        public static bool IsUnderWineOrSteamProton() => PlatformHelper.Is(Platform.Wine);
+        public static string GetApplicationPath() => null; // Seems to be null in ML too
+        public static string GetGameDataDirectory() => Path.Combine(Paths.GameRootPath, $"{Paths.ProcessName}_Data");
+        public static string GetManagedDirectory() => IsGameIl2Cpp()
+            ? Utility.CombinePaths(Paths.GameRootPath, "mono", "Managed")
+            : Utility.CombinePaths(Paths.GameRootPath, $"{Paths.ProcessName}_Data", "Managed");
+        public static void SetConsoleTitle([MarshalAs(UnmanagedType.LPStr)] string title)
+        {
+            // Stubbed, handled by BepInEx instead
+        }
+        public static string GetFileProductName(string filepath) => FileVersionInfo.GetVersionInfo(filepath).ProductName;
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsGame32Bit();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsGameIl2Cpp();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsOldMono();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsUnderWineOrSteamProton();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetApplicationPath();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetGameDataDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetManagedDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void SetConsoleTitle([MarshalAs(UnmanagedType.LPStr)] string title);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        public extern static string GetFileProductName([MarshalAs(UnmanagedType.LPStr)] string filepath);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NativeHookAttach(IntPtr target, IntPtr detour);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static void NativeHookDetach(IntPtr target, IntPtr detour);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetBaseDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetGameDirectory();
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string Internal_GetHashCode();
+        private static Dictionary<IntPtr, NativeDetour> InstalledHooks { get; } = new();
+        public static void NativeHookAttach(IntPtr target, IntPtr detour)
+        {
+            var newDetour = new NativeDetour(target, detour);
+            newDetour.Apply();
+            InstalledHooks[target] = newDetour;
+        }
+        public static void NativeHookDetach(IntPtr target, IntPtr detour)
+        {
+            var nativeDetour = InstalledHooks[target];
+            nativeDetour.Dispose();
+        }
+        private static string Internal_GetBaseDirectory() => Utility.CombinePaths(Paths.GameRootPath, "MLLoader");
+        private static string Internal_GetGameDirectory() => Paths.GameRootPath;
+        private static string Internal_GetHashCode() => "DEADBEEF";
     }
 }

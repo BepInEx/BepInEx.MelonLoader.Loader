@@ -37,9 +37,7 @@ namespace MelonLoader
 
         public static event Action<ConsoleColor, string> MsgCallbackHandler;
         public static event Action<string> ErrorCallbackHandler;
-        //public static bool IsEnabled() => MelonLaunchOptions.Core.DebugMode;
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static bool IsEnabled();
+        
+        public static bool IsEnabled() => MelonLaunchOptions.Core.DebugMode;
     }
 }
