@@ -1,4 +1,8 @@
-## BepInEx.MelonLoader.Loader
+<p align="center">
+  <a href="#"><img src="https://raw.githubusercontent.com/BepInEx/BepInEx.MelonLoader.Loader/master/logo.png"></a>
+</p>
+
+# BepInEx.MelonLoader.Loader
 
 Current version supports MelonLoader **0.5.7**.
 
